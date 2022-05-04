@@ -1,9 +1,10 @@
-import wandb
+# import wandb
 import numpy as np
 import gc
 import torch
 import torch.nn as nn
 import time
+import os
 
 from torch.utils.data import DataLoader, Dataset
 from gen_data.dataset import TrainDataset
@@ -19,13 +20,16 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 def train_fn(fold, train_loader, model, criterion, optimizer, epoch, scheduler,
              device, cfg):
+    cfg.wandb.watch(model, log_freq=100)
 
     model.train()
     scaler = torch.cuda.amp.GradScaler(enabled=cfg.apex)
     losses = AverageMeter()
     start = end = time.time()
     global_step = 0
+    print('!!!!!!!!!!!!!!!!!!!!!!!!!')
     for step, (inputs, labels) in enumerate(train_loader):
+        print(f'step: {step}')
         for k, v in inputs.items():
             inputs[k] = v.to(device)
         labels = labels.to(device)
@@ -57,9 +61,9 @@ def train_fn(fold, train_loader, model, criterion, optimizer, epoch, scheduler,
                           loss=losses,
                           grad_norm=grad_norm,
                           lr=scheduler.get_lr()[0]))
-        if cfg.wandb:
-            wandb.log({f"[fold{fold}] loss": losses.val,
-                       f"[fold{fold}] lr": scheduler.get_lr()[0]})
+        # if cfg.with_wandb:
+        #     cfg.wandb.log({f"[fold{fold}] loss": losses.val,
+        #                f"[fold{fold}] lr": scheduler.get_lr()[0]})
     return losses.avg
 
 
@@ -96,9 +100,9 @@ def valid_fn(valid_loader, model, criterion, device, cfg):
 
 def train_loop(folds, fold,
                cfg,
-               logger):
+               ):
 
-    logger.info(f"========== fold: {fold} training ==========")
+    cfg.logger.info(f"========== fold: {fold} training ==========")
 
     # ====================================================
     # loader
@@ -111,25 +115,19 @@ def train_loop(folds, fold,
     valid_dataset = TrainDataset(cfg, valid_folds)
 
     train_loader = DataLoader(train_dataset,
-                              batch_size=cfg.Train.batch_size,
+                              batch_size=cfg.batch_size,
                               shuffle=True,
-                              num_workers=cfg.Train.num_workers, pin_memory=True, drop_last=True)
+                              num_workers=cfg.num_workers, pin_memory=True, drop_last=True)
     valid_loader = DataLoader(valid_dataset,
-                              batch_size=cfg.Train.batch_size,
+                              batch_size=cfg.batch_size,
                               shuffle=False,
-                              num_workers=cfg.Train.num_workers, pin_memory=True, drop_last=False)
-
-    for step, (inputs, labels) in enumerate(train_loader):
-        print(f'inputs:::::: {inputs}')
-        pass
-
-    stop
+                              num_workers=cfg.num_workers, pin_memory=True, drop_last=False)
 
     # ====================================================
     # model & optimizer
     # ====================================================
     model = CustomModel(cfg, config_path=None, pretrained=True)
-    torch.save(model.config, cfg.Dir.output + 'config.pth')
+    torch.save(model.config, cfg.dir_output + 'config.pth')
     model.to(device)
 
     def get_optimizer_params(model, encoder_lr, decoder_lr, weight_decay=0.0):
@@ -146,27 +144,27 @@ def train_loop(folds, fold,
         return optimizer_parameters
 
     optimizer_parameters = get_optimizer_params(model,
-                                                encoder_lr=cfg.Model.encoder_lr,
-                                                decoder_lr=cfg.Model.decoder_lr,
-                                                weight_decay=cfg.Model.weight_decay)
-    optimizer = AdamW(optimizer_parameters, lr=cfg.Model.encoder_lr, eps=cfg.Model.eps, betas=cfg.Model.betas)
+                                                encoder_lr=cfg.encoder_lr,
+                                                decoder_lr=cfg.decoder_lr,
+                                                weight_decay=cfg.weight_decay)
+    optimizer = AdamW(optimizer_parameters, lr=cfg.encoder_lr, eps=cfg.eps, betas=cfg.betas)
 
     # ====================================================
     # scheduler
     # ====================================================
     def get_scheduler(cfg, optimizer, num_train_steps):
-        if cfg.Train.scheduler == 'linear':
+        if cfg.scheduler == 'linear':
             scheduler = get_linear_schedule_with_warmup(
-                optimizer, num_warmup_steps=cfg.Train.num_warmup_steps, num_training_steps=num_train_steps
+                optimizer, num_warmup_steps=cfg.num_warmup_steps, num_training_steps=num_train_steps
             )
-        elif cfg.Train.scheduler == 'cosine':
+        elif cfg.scheduler == 'cosine':
             scheduler = get_cosine_schedule_with_warmup(
-                optimizer, num_warmup_steps=cfg.Train.num_warmup_steps, num_training_steps=num_train_steps,
-                num_cycles=cfg.Train.num_cycles
+                optimizer, num_warmup_steps=cfg.num_warmup_steps, num_training_steps=num_train_steps,
+                num_cycles=cfg.num_cycles
             )
         return scheduler
 
-    num_train_steps = int(len(train_folds) / cfg.Train.batch_size * cfg.Train.epochs)
+    num_train_steps = int(len(train_folds) / cfg.batch_size * cfg.epochs)
     scheduler = get_scheduler(cfg, optimizer, num_train_steps)
 
     # ====================================================
@@ -176,7 +174,7 @@ def train_loop(folds, fold,
 
     best_score = 0.
 
-    for epoch in range(cfg.Train.epochs):
+    for epoch in range(cfg.epochs):
 
         start_time = time.time()
 
@@ -191,23 +189,24 @@ def train_loop(folds, fold,
 
         elapsed = time.time() - start_time
 
-        logger.info(
+        cfg.logger.info(
             f'Epoch {epoch + 1} - avg_train_loss: {avg_loss:.4f}  avg_val_loss: {avg_val_loss:.4f}  time: {elapsed:.0f}s')
-        logger.info(f'Epoch {epoch + 1} - Score: {score:.4f}')
-        if cfg.wandb:
-            wandb.log({f"[fold{fold}] epoch": epoch + 1,
-                       f"[fold{fold}] avg_train_loss": avg_loss,
-                       f"[fold{fold}] avg_val_loss": avg_val_loss,
-                       f"[fold{fold}] score": score})
-
+        cfg.logger.info(f'Epoch {epoch + 1} - Score: {score:.4f}')
+        # if cfg.with_wandb:
+        #     wandb.log({f"[fold{fold}] epoch": epoch + 1,
+        #                f"[fold{fold}] avg_train_loss": avg_loss,
+        #                f"[fold{fold}] avg_val_loss": avg_val_loss,
+        #                f"[fold{fold}] score": score})
         if best_score < score:
             best_score = score
-            logger.info(f'Epoch {epoch + 1} - Save Best Score: {best_score:.4f} Model')
+            cfg.logger.info(f'Epoch {epoch + 1} - Save Best Score: {best_score:.4f} Model')
             torch.save({'model': model.state_dict(),
                         'predictions': predictions},
-                       cfg.Dir.output + f"{cfg.model.replace('/', '-')}_fold{fold}_best.pth")
+                       os.path.join(cfg.dir_output,
+                                    f"{cfg.pretrained_model.replace('/', '-')}_fold{fold}_best.pth"))
 
-    predictions = torch.load(cfg.Dir.output + f"{cfg.model.replace('/', '-')}_fold{fold}_best.pth",
+    predictions = torch.load(os.path.join(cfg.dir_output,
+                                          f"{cfg.pretrained_model.replace('/', '-')}_fold{fold}_best.pth"),
                              map_location=torch.device('cpu'))['predictions']
     valid_folds['pred'] = predictions
 

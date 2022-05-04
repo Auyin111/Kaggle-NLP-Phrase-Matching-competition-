@@ -8,15 +8,15 @@ class CustomModel(nn.Module):
         super().__init__()
         self.cfg = cfg
         if config_path is None:
-            self.config = AutoConfig.from_pretrained(cfg.Model.pretrained_model, output_hidden_states=True)
+            self.config = AutoConfig.from_pretrained(cfg.pretrained_model, output_hidden_states=True)
         else:
             self.config = torch.load(config_path)
         if pretrained:
-            self.model = AutoModel.from_pretrained(cfg.Model.pretrained_model, config=self.config)
+            self.model = AutoModel.from_pretrained(cfg.pretrained_model, config=self.config)
         else:
             self.model = AutoModel.from_config(self.config)
-        self.fc_dropout = nn.Dropout(cfg.Model.fc_dropout)
-        self.fc = nn.Linear(self.config.hidden_size, self.cfg.Model.target_size)
+        self.fc_dropout = nn.Dropout(cfg.fc_dropout)
+        self.fc = nn.Linear(self.config.hidden_size, self.cfg.target_size)
         self._init_weights(self.fc)
         self.attention = nn.Sequential(
             nn.Linear(self.config.hidden_size, 512),
