@@ -1,45 +1,23 @@
-from utils import  get_logger, seed_everything
-
-from train_predict.train import train_loop
-from utils import get_score
 import os
 # import wandb
-
-import gc
-import re
-import ast
-import sys
-import copy
-import json
-import time
-import math
-import shutil
-import string
-import pickle
-import random
-import joblib
-import itertools
-from pathlib import Path
-import warnings
-warnings.filterwarnings("ignore")
-
-
 import pandas as pd
+import torch
+import warnings
+from utils import  get_logger, seed_everything
+from train_predict.train import train_loop
+from utils import get_score
+from transformers import AutoTokenizer
+from cfg import Cfg
+from sklearn.model_selection import StratifiedKFold, GroupKFold, KFold
+
+warnings.filterwarnings("ignore")
 pd.set_option('display.max_rows', 500)
 pd.set_option('display.max_columns', 500)
 pd.set_option('display.width', 1000)
 
-from sklearn.model_selection import StratifiedKFold, GroupKFold, KFold
-
-import torch
-from transformers import AutoTokenizer, AutoModel, AutoConfig
-
-from cfg import Cfg
-
-
-
 # TODO: what is it
 # %env TOKENIZERS_PARALLELISM=true
+
 
 def get_result(oof_df, cfg):
     labels = oof_df['score'].values
@@ -48,17 +26,10 @@ def get_result(oof_df, cfg):
     cfg.logger.info(f'Score: {score:<.4f}')
 
 
-
-
-
 if __name__ == '__main__':
 
     cfg = Cfg()
-    # TODO: use kaggle api
-
-
-    # remind: need convert to obj before pass in pytorch dataloader
-
+    # TODO: use kaggle wandb api
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
@@ -88,7 +59,6 @@ if __name__ == '__main__':
     cfg.tokenizer = tokenizer
 
     df_train.score.hist()
-    # logger.info(f'b: 1')
 
     if cfg.train:
         oof_df = pd.DataFrame()
