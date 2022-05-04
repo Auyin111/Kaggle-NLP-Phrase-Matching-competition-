@@ -49,8 +49,8 @@ class Cfg:
     max_grad_norm = 1000
 
     logger = get_logger(os.path.join(dir_output, 'train.log'))
-    wandb = wandb.init(project="patent_competition", entity="kaggle_winner", group=pretrained_model, job_type="train",
-                       name='rlin_9')
+    # wandb = wandb.init(project="patent_competition", entity="kaggle_winner", group=pretrained_model, job_type="train",
+    #                    name='rlin_9')
 
 
 if __name__ == '__main__':
