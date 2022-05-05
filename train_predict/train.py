@@ -1,4 +1,4 @@
-# import wandb
+import wandb
 import numpy as np
 import gc
 import torch
@@ -6,13 +6,14 @@ import torch.nn as nn
 import time
 import os
 
-from torch.utils.data import DataLoader, Dataset
+from torch.utils.data import DataLoader
 from gen_data.dataset import TrainDataset
 from model.model import CustomModel
-from torch.optim import Adam, SGD, AdamW
+from torch.optim import AdamW
 from transformers import get_linear_schedule_with_warmup, get_cosine_schedule_with_warmup
 from utils import get_score
-from utils import AverageMeter, asMinutes, timeSince
+from utils import AverageMeter, timeSince
+from tqdm import tqdm
 
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -20,16 +21,14 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 def train_fn(fold, train_loader, model, criterion, optimizer, epoch, scheduler,
              device, cfg):
-    cfg.wandb.watch(model, log_freq=100)
 
     model.train()
     scaler = torch.cuda.amp.GradScaler(enabled=cfg.apex)
     losses = AverageMeter()
     start = end = time.time()
     global_step = 0
-    print('!!!!!!!!!!!!!!!!!!!!!!!!!')
-    for step, (inputs, labels) in enumerate(train_loader):
-        print(f'step: {step}')
+
+    for step, (inputs, labels) in tqdm(enumerate(train_loader)):
         for k, v in inputs.items():
             inputs[k] = v.to(device)
         labels = labels.to(device)
@@ -61,9 +60,9 @@ def train_fn(fold, train_loader, model, criterion, optimizer, epoch, scheduler,
                           loss=losses,
                           grad_norm=grad_norm,
                           lr=scheduler.get_lr()[0]))
-        # if cfg.with_wandb:
-        #     cfg.wandb.log({f"[fold{fold}] loss": losses.val,
-        #                f"[fold{fold}] lr": scheduler.get_lr()[0]})
+        if cfg.with_wandb:
+            wandb.log({f"[fold{fold}] loss": losses.val,
+                       f"[fold{fold}] lr": scheduler.get_lr()[0]})
     return losses.avg
 
 
@@ -95,7 +94,6 @@ def valid_fn(valid_loader, model, criterion, device, cfg):
     predictions = np.concatenate(preds)
     predictions = np.concatenate(predictions)
     return losses.avg, predictions
-
 
 
 def train_loop(folds, fold,
@@ -192,11 +190,11 @@ def train_loop(folds, fold,
         cfg.logger.info(
             f'Epoch {epoch + 1} - avg_train_loss: {avg_loss:.4f}  avg_val_loss: {avg_val_loss:.4f}  time: {elapsed:.0f}s')
         cfg.logger.info(f'Epoch {epoch + 1} - Score: {score:.4f}')
-        # if cfg.with_wandb:
-        #     wandb.log({f"[fold{fold}] epoch": epoch + 1,
-        #                f"[fold{fold}] avg_train_loss": avg_loss,
-        #                f"[fold{fold}] avg_val_loss": avg_val_loss,
-        #                f"[fold{fold}] score": score})
+        if cfg.with_wandb:
+            wandb.log({f"[fold{fold}] epoch": epoch + 1,
+                       f"[fold{fold}] avg_train_loss": avg_loss,
+                       f"[fold{fold}] avg_val_loss": avg_val_loss,
+                       f"[fold{fold}] score": score})
         if best_score < score:
             best_score = score
             cfg.logger.info(f'Epoch {epoch + 1} - Save Best Score: {best_score:.4f} Model')

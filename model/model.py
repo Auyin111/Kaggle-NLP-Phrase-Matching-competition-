@@ -18,6 +18,7 @@ class CustomModel(nn.Module):
         self.fc_dropout = nn.Dropout(cfg.fc_dropout)
         self.fc = nn.Linear(self.config.hidden_size, self.cfg.target_size)
         self._init_weights(self.fc)
+        # TODO edit the model
         self.attention = nn.Sequential(
             nn.Linear(self.config.hidden_size, 512),
             nn.Tanh(),

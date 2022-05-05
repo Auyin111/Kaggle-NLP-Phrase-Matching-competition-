@@ -16,6 +16,7 @@ def get_logger(path):
     logger.addHandler(handler2)
     return logger
 
+
 def seed_everything(seed=42):
     random.seed(seed)
     os.environ['PYTHONHASHSEED'] = str(seed)
@@ -28,6 +29,13 @@ def seed_everything(seed=42):
 def get_score(y_true, y_pred):
     score = sp.stats.pearsonr(y_true, y_pred)[0]
     return score
+
+
+def get_result(oof_df, cfg):
+    labels = oof_df['score'].values
+    preds = oof_df['pred'].values
+    score = get_score(labels, preds)
+    cfg.logger.info(f'Score: {score:<.4f}')
 
 
 class AverageMeter(object):
