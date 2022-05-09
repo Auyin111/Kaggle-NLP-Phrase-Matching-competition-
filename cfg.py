@@ -4,6 +4,12 @@ from utils import get_logger
 
 class Cfg:
 
+    version = 'v2.0.0'
+    # dir and path
+    dir_output = os.path.join('output', version)
+    # TODO: kaggle? local?
+    dir_data = 'data'
+
     train = True
     seed = 42
     # TODO
@@ -14,14 +20,9 @@ class Cfg:
     apex = True
     print_freq = 100
 
-    # dir and path
-    # TODO
-    dir_output = 'output'
-    dir_data = 'data'
-
     # training
-    num_workers = 2
-    batch_size = 2
+    num_workers = 4
+    batch_size = 16
     scheduler = 'cosine'  # ['linear', 'cosine']
     batch_scheduler = True
     num_cycles = 0.5
@@ -48,11 +49,10 @@ class Cfg:
     max_grad_norm = 1000
 
     # logger
-    logger = get_logger(os.path.join(dir_output, 'train.log'))
+    logger = get_logger(os.path.join('output', 'train.log'))
 
     # wandb
     user = 'rlin'
-    version = 'v1.0.1'
     notes = 'example'
 
 

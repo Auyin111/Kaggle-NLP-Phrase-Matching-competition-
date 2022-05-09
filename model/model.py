@@ -4,6 +4,7 @@ from transformers import AutoTokenizer, AutoModel, AutoConfig
 
 
 class CustomModel(nn.Module):
+
     def __init__(self, cfg, config_path=None, pretrained=False):
         super().__init__()
         self.cfg = cfg
@@ -43,7 +44,6 @@ class CustomModel(nn.Module):
     def feature(self, inputs):
         outputs = self.model(**inputs)
         last_hidden_states = outputs[0]
-        # feature = torch.mean(last_hidden_states, 1)
         weights = self.attention(last_hidden_states)
         feature = torch.sum(weights * last_hidden_states, dim=1)
         return feature

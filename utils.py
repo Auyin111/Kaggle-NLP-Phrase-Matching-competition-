@@ -9,7 +9,7 @@ def get_logger(path):
     logger = getLogger(__name__)
     logger.setLevel(INFO)
     handler1 = StreamHandler()
-    handler1.setFormatter(Formatter("%(message)s"))
+    handler1.setFormatter(Formatter("%(message)s","%Y-%m-%d %H:%M:%S"))
     handler2 = FileHandler(filename=path)
     handler2.setFormatter(Formatter("%(message)s"))
     logger.addHandler(handler1)
@@ -69,3 +69,12 @@ def timeSince(since, percent):
     rs = es - s
     return '%s (remain %s)' % (asMinutes(s), asMinutes(rs))
 
+
+def highlight_string(string, symbol='-'):
+    str_len = len(string)
+
+    str_top_bottom = (str_len + 4) * symbol
+    str_middle = f'{symbol} {string} {symbol}'
+    str_output = f"""\n\n{str_top_bottom}\n{str_middle}\n{str_top_bottom}\n"""
+
+    return str_output

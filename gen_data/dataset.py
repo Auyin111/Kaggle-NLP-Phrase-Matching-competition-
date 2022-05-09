@@ -29,3 +29,16 @@ class TrainDataset(Dataset):
         inputs = prepare_input(self.cfg, self.texts[item])
         label = torch.tensor(self.labels[item], dtype=torch.float)
         return inputs, label
+
+
+class TestDataset(Dataset):
+    def __init__(self, cfg, df):
+        self.cfg = cfg
+        self.texts = df['text'].values
+
+    def __len__(self):
+        return len(self.texts)
+
+    def __getitem__(self, item):
+        inputs = prepare_input(self.cfg, self.texts[item])
+        return inputs

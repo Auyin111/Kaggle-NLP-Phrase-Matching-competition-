@@ -1,8 +1,10 @@
-import torch, tqdm
+import torch
+from tqdm import tqdm
 import numpy as np
 
 
 def inference_fn(test_loader, model, device):
+
     preds = []
     model.eval()
     model.to(device)

@@ -125,7 +125,11 @@ def train_loop(folds, fold,
     # model & optimizer
     # ====================================================
     model = CustomModel(cfg, config_path=None, pretrained=True)
-    torch.save(model.config, cfg.dir_output + 'config.pth')
+    dir_model_config = os.path.join(cfg.dir_output, 'config')
+    if not os.path.exists(dir_model_config):
+        os.makedirs(dir_model_config)
+
+    torch.save(model.config, os.path.join(dir_model_config, 'model.config'))
     model.to(device)
 
     def get_optimizer_params(model, encoder_lr, decoder_lr, weight_decay=0.0):
@@ -172,6 +176,11 @@ def train_loop(folds, fold,
 
     best_score = 0.
 
+    dir_model = os.path.join(cfg.dir_output, 'model',)
+    if not os.path.exists(dir_model):
+        os.makedirs(dir_model)
+    path_model = os.path.join(dir_model, f"fold_{fold}_best.model")
+
     for epoch in range(cfg.epochs):
 
         start_time = time.time()
@@ -200,12 +209,8 @@ def train_loop(folds, fold,
             cfg.logger.info(f'Epoch {epoch + 1} - Save Best Score: {best_score:.4f} Model')
             torch.save({'model': model.state_dict(),
                         'predictions': predictions},
-                       os.path.join(cfg.dir_output,
-                                    f"{cfg.pretrained_model.replace('/', '-')}_fold{fold}_best.pth"))
+                       path_model)
 
-    predictions = torch.load(os.path.join(cfg.dir_output,
-                                          f"{cfg.pretrained_model.replace('/', '-')}_fold{fold}_best.pth"),
-                             map_location=torch.device('cpu'))['predictions']
     valid_folds['pred'] = predictions
 
     torch.cuda.empty_cache()
