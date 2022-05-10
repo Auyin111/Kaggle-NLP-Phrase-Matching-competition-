@@ -1,0 +1,59 @@
+
+
+---------------------------------------------------
+- start train v2.0.4 model at 2022-05-11 00:17:25 -
+---------------------------------------------------
+
+========== fold: 0 training ==========
+Epoch 1 - avg_train_loss: 0.6962  avg_val_loss: 0.6354  time: 20s
+Epoch 1 - Score: 0.3063
+Epoch 1 - Save Best Score: 0.3063 Model
+Epoch 2 - avg_train_loss: 0.6902  avg_val_loss: 0.6297  time: 19s
+Epoch 2 - Score: 0.3540
+Epoch 2 - Save Best Score: 0.3540 Model
+Epoch 3 - avg_train_loss: 0.6345  avg_val_loss: 0.6327  time: 18s
+Epoch 3 - Score: 0.3756
+Epoch 3 - Save Best Score: 0.3756 Model
+========== fold: 0 result ==========
+Score: 0.3756
+========== fold: 1 training ==========
+Epoch 1 - avg_train_loss: 0.7688  avg_val_loss: 0.8388  time: 19s
+Epoch 1 - Score: 0.2047
+Epoch 1 - Save Best Score: 0.2047 Model
+Epoch 2 - avg_train_loss: 0.7704  avg_val_loss: 0.8388  time: 19s
+Epoch 2 - Score: 0.2047
+Epoch 3 - avg_train_loss: 0.7936  avg_val_loss: 0.8388  time: 19s
+Epoch 3 - Score: 0.2047
+========== fold: 1 result ==========
+Score: 0.2047
+========== fold: 2 training ==========
+Epoch 1 - avg_train_loss: 0.6869  avg_val_loss: 0.6680  time: 18s
+Epoch 1 - Score: 0.4869
+Epoch 1 - Save Best Score: 0.4869 Model
+Epoch 2 - avg_train_loss: 0.7015  avg_val_loss: 0.6680  time: 19s
+Epoch 2 - Score: 0.4869
+Epoch 3 - avg_train_loss: 0.6981  avg_val_loss: 0.6455  time: 19s
+Epoch 3 - Score: 0.4983
+Epoch 3 - Save Best Score: 0.4983 Model
+========== fold: 2 result ==========
+Score: 0.4983
+========== fold: 3 training ==========
+Epoch 1 - avg_train_loss: 0.5905  avg_val_loss: 0.6610  time: 19s
+Epoch 1 - Score: 0.0634
+Epoch 1 - Save Best Score: 0.0634 Model
+Epoch 2 - avg_train_loss: 0.6301  avg_val_loss: 0.6679  time: 19s
+Epoch 2 - Score: 0.0787
+Epoch 2 - Save Best Score: 0.0787 Model
+Epoch 3 - avg_train_loss: 0.5936  avg_val_loss: 0.6720  time: 19s
+Epoch 3 - Score: 0.0833
+Epoch 3 - Save Best Score: 0.0833 Model
+========== fold: 3 result ==========
+Score: 0.0833
+========== CV ==========
+Score: -0.1113
+
+
+--------------------------------------------------
+- predict by v2.0.4 model at 2022-05-11 00:21:55 -
+--------------------------------------------------
+

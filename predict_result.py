@@ -21,8 +21,16 @@ def predict_result():
     message_status = highlight_string(f'predict by {cfg.version} model at {current_time}')
     cfg.logger.info(message_status)
 
-    df_test = pd.read_csv('data/test.csv')
-    df_test['text'] = df_test.anchor + '[SEP]' + df_test.target + ['SEP']
+    df_test = pd.read_csv(os.path.join(cfg.dir_data, 'test.csv'))
+    df_context_grp_1 = pd.read_csv(os.path.join(cfg.dir_own_dataset, 'df_context_grp_1.csv'))
+    # form text column
+    df_test.loc[:, 'context_grp_1'] = df_test.context.apply(lambda x: x[0])
+    df_test = df_test.merge(df_context_grp_1, how='left', on='context_grp_1')
+    assert df_test.text_grp_1.isnull().sum() == 0, 'some of the context text are missing'
+    # TODO: map the context grp2 and update the text column
+    df_test['text'] = df_test.context_grp_1 + '[SEP]' \
+                       + df_test.anchor + '[SEP]' \
+                       + df_test.target + ['SEP']
 
     cfg.tokenizer = AutoTokenizer.from_pretrained(os.path.join(cfg.dir_output, 'tokenizer'))
 

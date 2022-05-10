@@ -2,6 +2,14 @@ import scipy as sp
 import numpy as np
 import os, random, time, math
 import torch
+import shutil
+
+
+def copy_and_overwrite(from_path, to_path):
+
+    if os.path.exists(to_path):
+        shutil.rmtree(to_path)
+    shutil.copytree(from_path, to_path)
 
 
 def get_logger(path):

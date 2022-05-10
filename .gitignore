@@ -1,4 +1,8 @@
 TODO.md
 testing.py
 submission.csv
-#*.ipynb
+*testing.ipynb
+requirements.txt
+output/v*
+wandb
+#.ipynb_checkpoints

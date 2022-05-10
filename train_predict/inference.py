@@ -16,4 +16,5 @@ def inference_fn(test_loader, model, device):
             y_preds = model(inputs)
         preds.append(y_preds.sigmoid().to('cpu').numpy())
     predictions = np.concatenate(preds)
+
     return predictions

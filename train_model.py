@@ -31,10 +31,10 @@ def train_model():
     message_status = highlight_string(f'start train {cfg.version} model at {current_time}')
     cfg.logger.info(message_status)
 
-    # TODO: use kaggle wandb api
-    wandb.init(project=f"patent_competition", entity="kaggle_winner",
-               group=f'{cfg.user}_{cfg.pretrained_model}', job_type="train",
-               name=cfg.version, notes=cfg.notes)
+    if not cfg.on_kaggle:
+        wandb.init(project=f"patent_competition", entity="kaggle_winner",
+                   group=f'{cfg.user}_{cfg.pretrained_model}', job_type="train",
+                   name=cfg.version, notes=cfg.notes)
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print(f'using device: {device}')
@@ -49,8 +49,15 @@ def train_model():
 
     df_train = pd.read_csv(os.path.join(cfg.dir_data, 'train.csv'))
     df_train = df_train.head(40)
-    # TODO: map the context and update the text column
-    df_train['text'] = df_train.anchor + '[SEP]' + df_train.target + ['SEP']
+    df_context_grp_1 = pd.read_csv(os.path.join(cfg.dir_own_dataset, 'df_context_grp_1.csv'))
+    # form text column
+    df_train.loc[:, 'context_grp_1'] = df_train.context.apply(lambda x: x[0])
+    df_train = df_train.merge(df_context_grp_1, how='left', on='context_grp_1')
+    assert df_train.text_grp_1.isnull().sum() == 0, 'some of the context text are missing'
+    # TODO: map the context grp2 and update the text column
+    df_train['text'] = df_train.context_grp_1 + '[SEP]' \
+                       + df_train.anchor + '[SEP]' \
+                       + df_train.target + ['SEP']
 
     df_train['score_map'] = df_train.score.map({0: 0, 0.25: 1, 0.5: 2, 0.75: 3, 1: 4})
 

@@ -1,14 +1,28 @@
 import os
 from utils import get_logger
+from pathlib import Path
 
 
 class Cfg:
 
-    version = 'v2.0.0'
+    Path("output").mkdir(parents=True, exist_ok=True)
+
+    def __init__(self):
+
+        # dir_data
+        if os.path.exists('/kaggle/input'):
+            print('Reminder: you are running in Kaggle')
+            self.dir_data = '/kaggle/input'
+            self.on_kaggle = True
+        else:
+            print('Reminder: you are not in kaggle')
+            self.dir_data = 'kaggle/input'
+            self.on_kaggle = False
+
+    version = 'v2.0.4'
     # dir and path
     dir_output = os.path.join('output', version)
-    # TODO: kaggle? local?
-    dir_data = 'data'
+    dir_own_dataset = 'own_dataset'
 
     train = True
     seed = 42
@@ -59,4 +73,4 @@ class Cfg:
 if __name__ == '__main__':
 
     cfg = Cfg()
-    print(cfg.wandb)
+    print(cfg.version)
