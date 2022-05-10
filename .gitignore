@@ -5,4 +5,4 @@ submission.csv
 requirements.txt
 output/v*
 wandb
-#.ipynb_checkpoints
+.ipynb_checkpoints
