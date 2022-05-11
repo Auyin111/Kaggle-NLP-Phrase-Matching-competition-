@@ -2,6 +2,7 @@ import scipy as sp
 import numpy as np
 import os, random, time, math
 import torch
+import stat
 import shutil
 
 
@@ -10,6 +11,18 @@ def copy_and_overwrite(from_path, to_path):
     if os.path.exists(to_path):
         shutil.rmtree(to_path)
     shutil.copytree(from_path, to_path)
+
+
+def rmtree(top):
+
+    for root, dirs, files in os.walk(top, topdown=False):
+        for name in files:
+            filename = os.path.join(root, name)
+            os.chmod(filename, stat.S_IWUSR)
+            os.remove(filename)
+        for name in dirs:
+            os.rmdir(os.path.join(root, name))
+    os.rmdir(top)
 
 
 def get_logger(path):

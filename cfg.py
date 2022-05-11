@@ -7,29 +7,33 @@ class Cfg:
 
     Path("output").mkdir(parents=True, exist_ok=True)
 
-    def __init__(self):
+    def __init__(self, version, with_wandb):
+
+        self.version = version
+        self.with_wandb = with_wandb
+        self.dir_output = os.path.join('output', self.version)
 
         # dir_data
         if os.path.exists('/kaggle/input'):
             print('Reminder: you are running in Kaggle')
-            self.dir_data = '/kaggle/input'
+            self.dir_data = '/kaggle/input/us-patent-phrase-to-phrase-matching'
             self.on_kaggle = True
         else:
             print('Reminder: you are not in kaggle')
             self.dir_data = 'kaggle/input'
             self.on_kaggle = False
 
-    version = 'v2.0.4'
     # dir and path
-    dir_output = os.path.join('output', version)
     dir_own_dataset = 'own_dataset'
+
+    # wandb
+    user = 'rlin'
+    notes = 'example'
+    _wandb_kernel = 'nakama'
 
     train = True
     seed = 42
-    # TODO
-    with_wandb = True
     competition = 'PPPM'
-    _wandb_kernel = 'nakama'
     debug = False
     apex = True
     print_freq = 100
@@ -64,10 +68,6 @@ class Cfg:
 
     # logger
     logger = get_logger(os.path.join('output', 'train.log'))
-
-    # wandb
-    user = 'rlin'
-    notes = 'example'
 
 
 if __name__ == '__main__':
