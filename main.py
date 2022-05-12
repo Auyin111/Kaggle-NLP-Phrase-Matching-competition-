@@ -159,6 +159,6 @@ def predict_result(version, with_wandb):
 
 if __name__ == '__main__':
 
-    version = 'v2.0.8'
+    version = 'v3.0.2'
     train_model(version, False)
     predict_result(version, False)
