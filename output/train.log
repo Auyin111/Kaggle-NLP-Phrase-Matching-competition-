@@ -231,3 +231,465 @@ Score: 0.0434
 - start train v2.0.8 model at 2022-05-11 22:13:21 -
 ---------------------------------------------------
 
+
+
+---------------------------------------------------
+- start train v3.0.6 model at 2022-05-14 16:15:29 -
+---------------------------------------------------
+
+
+
+---------------------------------------------------
+- start train v3.0.6 model at 2022-05-14 16:16:23 -
+---------------------------------------------------
+
+
+
+---------------------------------------------------
+- start train v3.0.6 model at 2022-05-14 16:16:56 -
+---------------------------------------------------
+
+
+
+---------------------------------------------------
+- start train v3.0.6 model at 2022-05-14 16:17:28 -
+---------------------------------------------------
+
+========== fold: 0 training ==========
+Epoch 1 - avg_train_loss: 0.6498  avg_val_loss: 0.6373  time: 21s
+Epoch 1 - Score: 0.1529
+Epoch 1 - Save Best Score: 0.1529 Model
+Epoch 2 - avg_train_loss: 0.6308  avg_val_loss: 0.6546  time: 19s
+Epoch 2 - Score: 0.1662
+Epoch 2 - Save Best Score: 0.1662 Model
+========== fold: 0 result ==========
+Score: 0.1662
+========== CV ==========
+Score: 0.1662
+
+
+--------------------------------------------------
+- predict by v3.0.6 model at 2022-05-14 16:19:56 -
+--------------------------------------------------
+
+
+
+---------------------------------------------------
+- start train v3.0.7 model at 2022-05-14 16:26:55 -
+---------------------------------------------------
+
+========== fold: 0 training ==========
+Epoch 1 - avg_train_loss: 0.5744  avg_val_loss: 0.5471  time: 377s
+Epoch 1 - Score: 0.8167
+Epoch 1 - Save Best Score: 0.8167 Model
+Epoch 2 - avg_train_loss: 0.5310  avg_val_loss: 0.5435  time: 381s
+Epoch 2 - Score: 0.8321
+Epoch 2 - Save Best Score: 0.8321 Model
+Epoch 3 - avg_train_loss: 0.5237  avg_val_loss: 0.5473  time: 377s
+Epoch 3 - Score: 0.8384
+Epoch 3 - Save Best Score: 0.8384 Model
+Epoch 4 - avg_train_loss: 0.5146  avg_val_loss: 0.5505  time: 379s
+Epoch 4 - Score: 0.8424
+Epoch 4 - Save Best Score: 0.8424 Model
+Epoch 5 - avg_train_loss: 0.5111  avg_val_loss: 0.5513  time: 376s
+Epoch 5 - Score: 0.8410
+Epoch 6 - avg_train_loss: 0.5047  avg_val_loss: 0.5639  time: 380s
+Epoch 6 - Score: 0.8437
+Epoch 6 - Save Best Score: 0.8437 Model
+Epoch 7 - avg_train_loss: 0.4998  avg_val_loss: 0.5601  time: 385s
+Epoch 7 - Score: 0.8436
+Epoch 8 - avg_train_loss: 0.4975  avg_val_loss: 0.5607  time: 379s
+Epoch 8 - Score: 0.8464
+Epoch 8 - Save Best Score: 0.8464 Model
+Epoch 9 - avg_train_loss: 0.4951  avg_val_loss: 0.5624  time: 378s
+Epoch 9 - Score: 0.8453
+Epoch 10 - avg_train_loss: 0.4944  avg_val_loss: 0.5620  time: 377s
+Epoch 10 - Score: 0.8454
+========== fold: 0 result ==========
+Score: 0.8454
+========== fold: 1 training ==========
+Epoch 1 - avg_train_loss: 0.5687  avg_val_loss: 0.5451  time: 376s
+Epoch 1 - Score: 0.8179
+Epoch 1 - Save Best Score: 0.8179 Model
+Epoch 2 - avg_train_loss: 0.5336  avg_val_loss: 0.5397  time: 377s
+Epoch 2 - Score: 0.8388
+Epoch 2 - Save Best Score: 0.8388 Model
+Epoch 3 - avg_train_loss: 0.5301  avg_val_loss: 0.5413  time: 379s
+Epoch 3 - Score: 0.8418
+Epoch 3 - Save Best Score: 0.8418 Model
+Epoch 4 - avg_train_loss: 0.5117  avg_val_loss: 0.5489  time: 378s
+Epoch 4 - Score: 0.8459
+Epoch 4 - Save Best Score: 0.8459 Model
+Epoch 5 - avg_train_loss: 0.5107  avg_val_loss: 0.5574  time: 379s
+Epoch 5 - Score: 0.8436
+Epoch 6 - avg_train_loss: 0.5014  avg_val_loss: 0.5496  time: 377s
+Epoch 6 - Score: 0.8504
+Epoch 6 - Save Best Score: 0.8504 Model
+Epoch 7 - avg_train_loss: 0.4997  avg_val_loss: 0.5542  time: 381s
+Epoch 7 - Score: 0.8474
+Epoch 8 - avg_train_loss: 0.4963  avg_val_loss: 0.5602  time: 383s
+Epoch 8 - Score: 0.8461
+Epoch 9 - avg_train_loss: 0.4941  avg_val_loss: 0.5600  time: 379s
+Epoch 9 - Score: 0.8466
+Epoch 10 - avg_train_loss: 0.4940  avg_val_loss: 0.5603  time: 373s
+Epoch 10 - Score: 0.8473
+========== fold: 1 result ==========
+Score: 0.8473
+========== fold: 2 training ==========
+Epoch 1 - avg_train_loss: 0.5704  avg_val_loss: 0.5495  time: 372s
+Epoch 1 - Score: 0.8112
+Epoch 1 - Save Best Score: 0.8112 Model
+Epoch 2 - avg_train_loss: 0.5358  avg_val_loss: 0.5519  time: 372s
+Epoch 2 - Score: 0.8229
+Epoch 2 - Save Best Score: 0.8229 Model
+Epoch 3 - avg_train_loss: 0.5229  avg_val_loss: 0.5488  time: 373s
+Epoch 3 - Score: 0.8277
+Epoch 3 - Save Best Score: 0.8277 Model
+Epoch 4 - avg_train_loss: 0.5134  avg_val_loss: 0.5481  time: 374s
+Epoch 4 - Score: 0.8325
+Epoch 4 - Save Best Score: 0.8325 Model
+Epoch 5 - avg_train_loss: 0.5071  avg_val_loss: 0.5487  time: 375s
+Epoch 5 - Score: 0.8364
+Epoch 5 - Save Best Score: 0.8364 Model
+Epoch 6 - avg_train_loss: 0.5027  avg_val_loss: 0.5548  time: 375s
+Epoch 6 - Score: 0.8392
+Epoch 6 - Save Best Score: 0.8392 Model
+Epoch 7 - avg_train_loss: 0.4996  avg_val_loss: 0.5626  time: 375s
+Epoch 7 - Score: 0.8389
+Epoch 8 - avg_train_loss: 0.4952  avg_val_loss: 0.5673  time: 378s
+Epoch 8 - Score: 0.8395
+Epoch 8 - Save Best Score: 0.8395 Model
+
+
+--------------------------------------------------
+- predict by v3.0.7 model at 2022-05-14 19:25:35 -
+--------------------------------------------------
+
+
+
+--------------------------------------------------
+- predict by v3.0.7 model at 2022-05-14 19:35:32 -
+--------------------------------------------------
+
+
+
+--------------------------------------------------
+- predict by v3.0.7 model at 2022-05-14 19:36:24 -
+--------------------------------------------------
+
+
+
+---------------------------------------------------
+- start train v3.0.8 model at 2022-05-14 19:37:38 -
+---------------------------------------------------
+
+========== fold: 0 training ==========
+
+
+---------------------------------------------------
+- start train v3.0.8 model at 2022-05-14 19:39:21 -
+---------------------------------------------------
+
+
+
+---------------------------------------------------
+- start train v3.0.8 model at 2022-05-14 19:39:33 -
+---------------------------------------------------
+
+========== fold: 0 training ==========
+Epoch 1 - avg_train_loss: 0.6498  avg_val_loss: 0.6373  time: 21s
+Epoch 1 - Score: 0.1529
+Epoch 1 - Save Best Score: 0.1529 Model
+Epoch 2 - avg_train_loss: 0.6308  avg_val_loss: 0.6546  time: 19s
+Epoch 2 - Score: 0.1662
+Epoch 2 - Save Best Score: 0.1662 Model
+========== fold: 0 result ==========
+Score: 0.1662
+========== CV ==========
+Score: 0.1662
+
+
+--------------------------------------------------
+- predict by v3.0.8 model at 2022-05-14 19:40:35 -
+--------------------------------------------------
+
+
+
+---------------------------------------------------
+- start train v3.0.8 model at 2022-05-14 19:43:51 -
+---------------------------------------------------
+
+
+
+---------------------------------------------------
+- start train v3.0.8 model at 2022-05-14 19:46:25 -
+---------------------------------------------------
+
+========== fold: 0 training ==========
+Epoch 1 - avg_train_loss: 0.6573  avg_val_loss: 0.6312  time: 21s
+Epoch 1 - Score: 0.0077
+Epoch 1 - Save Best Score: 0.0077 Model
+Epoch 2 - avg_train_loss: 0.6417  avg_val_loss: 0.6334  time: 20s
+Epoch 2 - Score: 0.0106
+Epoch 2 - Save Best Score: 0.0106 Model
+========== fold: 0 result ==========
+Score: 0.0106
+========== CV ==========
+Score: 0.0106
+
+
+--------------------------------------------------
+- predict by v3.0.8 model at 2022-05-14 19:47:31 -
+--------------------------------------------------
+
+
+
+--------------------------------------------------
+- predict by v3.0.8 model at 2022-05-14 19:49:53 -
+--------------------------------------------------
+
+
+
+--------------------------------------------------
+- predict by v3.0.8 model at 2022-05-14 20:17:12 -
+--------------------------------------------------
+
+
+
+--------------------------------------------------
+- predict by v3.0.8 model at 2022-05-14 20:23:42 -
+--------------------------------------------------
+
+
+
+--------------------------------------------------
+- predict by v3.0.8 model at 2022-05-15 00:49:13 -
+--------------------------------------------------
+
+
+
+--------------------------------------------------
+- predict by v3.0.8 model at 2022-05-15 00:50:16 -
+--------------------------------------------------
+
+
+
+--------------------------------------------------
+- predict by v3.0.8 model at 2022-05-15 11:31:09 -
+--------------------------------------------------
+
+
+
+---------------------------------------------------
+- start train v3.0.9 model at 2022-05-15 11:37:02 -
+---------------------------------------------------
+
+========== fold: 0 training ==========
+Epoch 1 - avg_train_loss: 0.6573  avg_val_loss: 0.6312  time: 22s
+Epoch 1 - Score: 0.0077
+Epoch 1 - Save Best Score: 0.0077 Model
+Epoch 2 - avg_train_loss: 0.6417  avg_val_loss: 0.6334  time: 20s
+Epoch 2 - Score: 0.0106
+Epoch 2 - Save Best Score: 0.0106 Model
+========== fold: 0 result ==========
+Score: 0.0106
+========== CV ==========
+Score: 0.0106
+
+
+--------------------------------------------------
+- predict by v3.0.9 model at 2022-05-15 11:38:07 -
+--------------------------------------------------
+
+
+
+---------------------------------------------------
+- start train v3.0.9 model at 2022-05-15 11:39:09 -
+---------------------------------------------------
+
+
+
+---------------------------------------------------
+- start train v3.0.9 model at 2022-05-15 11:43:05 -
+---------------------------------------------------
+
+========== fold: 0 training ==========
+Epoch 1 - avg_train_loss: 0.6573  avg_val_loss: 0.6312  time: 21s
+Epoch 1 - Score: 0.0077
+Epoch 1 - Save Best Score: 0.0077 Model
+Epoch 2 - avg_train_loss: 0.6417  avg_val_loss: 0.6334  time: 20s
+Epoch 2 - Score: 0.0106
+Epoch 2 - Save Best Score: 0.0106 Model
+========== fold: 0 result ==========
+Score: 0.0106
+========== fold: 1 training ==========
+Epoch 1 - avg_train_loss: 0.6474  avg_val_loss: 0.6362  time: 20s
+Epoch 1 - Score: 0.3183
+Epoch 1 - Save Best Score: 0.3183 Model
+Epoch 2 - avg_train_loss: 0.6321  avg_val_loss: 0.6364  time: 20s
+Epoch 2 - Score: 0.3285
+Epoch 2 - Save Best Score: 0.3285 Model
+========== fold: 1 result ==========
+Score: 0.3285
+========== CV ==========
+Score: 0.0709
+
+
+--------------------------------------------------
+- predict by v3.0.9 model at 2022-05-15 11:44:55 -
+--------------------------------------------------
+
+
+
+---------------------------------------------------
+- start train v3.1.0 model at 2022-05-15 11:56:01 -
+---------------------------------------------------
+
+========== fold: 0 training ==========
+Epoch 1 - avg_train_loss: 0.6573  avg_val_loss: 0.6312  time: 22s
+Epoch 1 - Score: 0.0077
+Epoch 1 - Save Best Score: 0.0077 Model
+Epoch 2 - avg_train_loss: 0.6417  avg_val_loss: 0.6334  time: 21s
+Epoch 2 - Score: 0.0106
+Epoch 2 - Save Best Score: 0.0106 Model
+========== fold: 0 result ==========
+Score: 0.0106
+========== fold: 1 training ==========
+Epoch 1 - avg_train_loss: 0.6474  avg_val_loss: 0.6362  time: 21s
+Epoch 1 - Score: 0.3183
+Epoch 1 - Save Best Score: 0.3183 Model
+Epoch 2 - avg_train_loss: 0.6321  avg_val_loss: 0.6364  time: 21s
+Epoch 2 - Score: 0.3285
+Epoch 2 - Save Best Score: 0.3285 Model
+========== fold: 1 result ==========
+Score: 0.3285
+========== CV ==========
+Score: 0.0709
+
+
+--------------------------------------------------
+- predict by v3.1.0 model at 2022-05-15 11:57:52 -
+--------------------------------------------------
+
+
+
+---------------------------------------------------
+- start train v3.1.0 model at 2022-05-15 12:43:32 -
+---------------------------------------------------
+
+========== fold: 0 training ==========
+Epoch 1 - avg_train_loss: 0.6501  avg_val_loss: 0.6346  time: 22s
+Epoch 1 - Score: 0.2018
+Epoch 1 - Save Best Score: 0.2018 Model
+Epoch 2 - avg_train_loss: 0.6490  avg_val_loss: 0.6339  time: 21s
+Epoch 2 - Score: 0.2056
+Epoch 2 - Save Best Score: 0.2056 Model
+========== fold: 0 result ==========
+Score: 0.2056
+========== fold: 1 training ==========
+Epoch 1 - avg_train_loss: 0.6396  avg_val_loss: 0.6413  time: 21s
+Epoch 1 - Score: 0.0761
+Epoch 1 - Save Best Score: 0.0761 Model
+Epoch 2 - avg_train_loss: 0.6389  avg_val_loss: 0.6409  time: 21s
+Epoch 2 - Score: 0.0841
+Epoch 2 - Save Best Score: 0.0841 Model
+========== fold: 1 result ==========
+Score: 0.0841
+========== CV ==========
+Score: 0.1509
+
+
+--------------------------------------------------
+- predict by v3.1.0 model at 2022-05-15 12:45:27 -
+--------------------------------------------------
+
+
+
+---------------------------------------------------
+- start train v3.1.1 model at 2022-05-15 12:47:09 -
+---------------------------------------------------
+
+========== fold: 0 training ==========
+
+
+---------------------------------------------------
+- start train v3.1.1 model at 2022-05-15 12:53:15 -
+---------------------------------------------------
+
+========== fold: 0 training ==========
+Epoch 1 - avg_train_loss: 0.5734  avg_val_loss: 0.5464  time: 391s
+Epoch 1 - Score: 0.8190
+Epoch 1 - Save Best Score: 0.8190 Model
+Epoch 2 - avg_train_loss: 0.5326  avg_val_loss: 0.5457  time: 388s
+Epoch 2 - Score: 0.8325
+Epoch 2 - Save Best Score: 0.8325 Model
+Epoch 3 - avg_train_loss: 0.5246  avg_val_loss: 0.5498  time: 393s
+Epoch 3 - Score: 0.8384
+Epoch 3 - Save Best Score: 0.8384 Model
+Epoch 4 - avg_train_loss: 0.5169  avg_val_loss: 0.5502  time: 390s
+Epoch 4 - Score: 0.8415
+Epoch 4 - Save Best Score: 0.8415 Model
+Epoch 5 - avg_train_loss: 0.5124  avg_val_loss: 0.5513  time: 389s
+Epoch 5 - Score: 0.8413
+========== fold: 0 result ==========
+Score: 0.8413
+========== fold: 1 training ==========
+Epoch 1 - avg_train_loss: 0.5690  avg_val_loss: 0.5458  time: 388s
+Epoch 1 - Score: 0.8211
+Epoch 1 - Save Best Score: 0.8211 Model
+Epoch 2 - avg_train_loss: 0.5318  avg_val_loss: 0.5452  time: 387s
+Epoch 2 - Score: 0.8372
+Epoch 2 - Save Best Score: 0.8372 Model
+Epoch 3 - avg_train_loss: 0.5231  avg_val_loss: 0.5442  time: 385s
+Epoch 3 - Score: 0.8414
+Epoch 3 - Save Best Score: 0.8414 Model
+Epoch 4 - avg_train_loss: 0.5169  avg_val_loss: 0.5444  time: 383s
+Epoch 4 - Score: 0.8463
+Epoch 4 - Save Best Score: 0.8463 Model
+Epoch 5 - avg_train_loss: 0.5103  avg_val_loss: 0.5476  time: 378s
+Epoch 5 - Score: 0.8457
+========== fold: 1 result ==========
+Score: 0.8457
+========== fold: 2 training ==========
+Epoch 1 - avg_train_loss: 0.5705  avg_val_loss: 0.5641  time: 386s
+Epoch 1 - Score: 0.8039
+Epoch 1 - Save Best Score: 0.8039 Model
+Epoch 2 - avg_train_loss: 0.5339  avg_val_loss: 0.5439  time: 380s
+Epoch 2 - Score: 0.8285
+Epoch 2 - Save Best Score: 0.8285 Model
+Epoch 3 - avg_train_loss: 0.5237  avg_val_loss: 0.5453  time: 382s
+Epoch 3 - Score: 0.8335
+Epoch 3 - Save Best Score: 0.8335 Model
+Epoch 4 - avg_train_loss: 0.5134  avg_val_loss: 0.5539  time: 384s
+Epoch 4 - Score: 0.8334
+Epoch 5 - avg_train_loss: 0.5100  avg_val_loss: 0.5508  time: 384s
+Epoch 5 - Score: 0.8363
+Epoch 5 - Save Best Score: 0.8363 Model
+========== fold: 2 result ==========
+Score: 0.8363
+========== fold: 3 training ==========
+Epoch 1 - avg_train_loss: 0.5721  avg_val_loss: 0.5543  time: 384s
+Epoch 1 - Score: 0.8097
+Epoch 1 - Save Best Score: 0.8097 Model
+Epoch 2 - avg_train_loss: 0.5335  avg_val_loss: 0.5458  time: 381s
+Epoch 2 - Score: 0.8324
+Epoch 2 - Save Best Score: 0.8324 Model
+Epoch 3 - avg_train_loss: 0.5240  avg_val_loss: 0.5431  time: 384s
+Epoch 3 - Score: 0.8341
+Epoch 3 - Save Best Score: 0.8341 Model
+Epoch 4 - avg_train_loss: 0.5164  avg_val_loss: 0.5509  time: 373s
+Epoch 4 - Score: 0.8343
+Epoch 4 - Save Best Score: 0.8343 Model
+Epoch 5 - avg_train_loss: 0.5122  avg_val_loss: 0.5496  time: 383s
+Epoch 5 - Score: 0.8365
+Epoch 5 - Save Best Score: 0.8365 Model
+========== fold: 3 result ==========
+Score: 0.8365
+========== CV ==========
+Score: 0.8398
+
+
+--------------------------------------------------
+- predict by v3.1.1 model at 2022-05-15 15:02:12 -
+--------------------------------------------------
+

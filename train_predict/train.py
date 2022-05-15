@@ -16,9 +16,6 @@ from utils import AverageMeter, timeSince
 from tqdm import tqdm
 
 
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-
-
 def train_fn(fold, train_loader, model, criterion, optimizer, epoch, scheduler,
              device, cfg):
 
@@ -125,12 +122,9 @@ def train_loop(folds, fold,
     # model & optimizer
     # ====================================================
     model = CustomModel(cfg, config_path=None, pretrained=True)
-    dir_model_config = os.path.join(cfg.dir_output, 'config')
-    if not os.path.exists(dir_model_config):
-        os.makedirs(dir_model_config)
 
-    torch.save(model.config, os.path.join(dir_model_config, 'model.config'))
-    model.to(device)
+    torch.save(model.config, os.path.join(cfg.dir_output, 'model.config'))
+    model.to(cfg.device)
 
     def get_optimizer_params(model, encoder_lr, decoder_lr, weight_decay=0.0):
         param_optimizer = list(model.named_parameters())
@@ -186,10 +180,10 @@ def train_loop(folds, fold,
         start_time = time.time()
 
         # train_predict
-        avg_loss = train_fn(fold, train_loader, model, criterion, optimizer, epoch, scheduler, device, cfg)
+        avg_loss = train_fn(fold, train_loader, model, criterion, optimizer, epoch, scheduler, cfg.device, cfg)
 
         # eval
-        avg_val_loss, predictions = valid_fn(valid_loader, model, criterion, device, cfg)
+        avg_val_loss, predictions = valid_fn(valid_loader, model, criterion, cfg.device, cfg)
 
         # scoring
         score = get_score(valid_labels, predictions)
@@ -204,7 +198,7 @@ def train_loop(folds, fold,
                        f"[fold{fold}] avg_train_loss": avg_loss,
                        f"[fold{fold}] avg_val_loss": avg_val_loss,
                        f"[fold{fold}] score": score})
-        if best_score < score:
+        if (best_score < score) or (epoch == 0):
             best_score = score
             cfg.logger.info(f'Epoch {epoch + 1} - Save Best Score: {best_score:.4f} Model')
             torch.save({'model': model.state_dict(),
