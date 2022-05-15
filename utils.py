@@ -6,6 +6,38 @@ import stat
 import shutil
 
 
+def cp_child_content(dir_source, dir_destination, list_cp_content):
+    """copy child directory content"""
+
+    for content in list_cp_content:
+
+        path_source = os.path.join(dir_source, content)
+        path_destination = os.path.join(dir_destination, content)
+
+        if os.path.isdir(path_source):
+            shutil.copytree(path_source,
+                            path_destination)
+
+        else:
+            shutil.copy2(path_source, path_destination)
+
+
+def copy_to_working_dir(source_dir, destination_dir):
+    """copy all folder and file in working directory"""
+
+    for folder_or_file in os.listdir(source_dir):
+
+        path_folder_file = os.path.join(source_dir, folder_or_file)
+        path_folder_file_des = os.path.join(destination_dir, folder_or_file)
+
+        if os.path.isdir(path_folder_file):
+            copy_and_overwrite(path_folder_file, path_folder_file_des)
+        else:
+            # copying the files to the
+            # destination directory
+            shutil.copy2(path_folder_file, destination_dir)
+
+
 def copy_and_overwrite(from_path, to_path):
 
     if os.path.exists(to_path):

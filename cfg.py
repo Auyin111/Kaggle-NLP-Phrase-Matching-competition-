@@ -1,4 +1,5 @@
 import os
+import torch
 from utils import get_logger
 from pathlib import Path
 
@@ -7,7 +8,7 @@ class Cfg:
 
     Path("output").mkdir(parents=True, exist_ok=True)
 
-    def __init__(self, version, with_wandb):
+    def __init__(self, version, with_wandb, is_debug, device=None):
 
         self.version = version
         self.with_wandb = with_wandb
@@ -22,6 +23,22 @@ class Cfg:
             print('Reminder: you are not in kaggle')
             self.dir_data = 'kaggle/input'
             self.on_kaggle = False
+
+        self.is_debug = is_debug
+        if self.is_debug:
+            self.epochs = 2
+            self.n_fold = 2
+            self.trn_fold = [0, 1]
+        else:
+            self.epochs = 5
+            # CV
+            self.n_fold = 4
+            self.trn_fold = [0, 1, 2, 3]
+
+        self.device = device
+        if self.device is None:
+            self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        print(f'using device: {self.device}')
 
     # dir and path
     dir_own_dataset = 'own_dataset'
@@ -45,12 +62,8 @@ class Cfg:
     batch_scheduler = True
     num_cycles = 0.5
     num_warmup_steps = 0
-    epochs = 3
+    # TODO: define by data nature
     max_len = 128
-
-    # CV
-    n_fold = 4
-    trn_fold = [0, 1, 2, 3]
 
     # Model
     # pretrained_model = "microsoft/deberta-v3-large"

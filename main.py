@@ -27,11 +27,11 @@ pd.set_option('display.width', 1000)
 # %env TOKENIZERS_PARALLELISM=true
 
 
-def train_model(version, with_wandb):
+def train_model(version, with_wandb, is_debug=False, device=None):
 
     # setting
     ####################################################
-    cfg = Cfg(version, with_wandb)
+    cfg = Cfg(version, with_wandb, is_debug=is_debug, device=device)
 
     current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     message_status = highlight_string(f'start train {cfg.version} model at {current_time}')
@@ -45,9 +45,6 @@ def train_model(version, with_wandb):
         except:
             print('can not connect to wandb, it may due to internet or secret problem')
 
-
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    print(f'using device: {device}')
     seed_everything(seed=42)
 
     # start
@@ -59,7 +56,8 @@ def train_model(version, with_wandb):
 
     df_train = pd.read_csv(os.path.join(cfg.dir_data, 'train.csv'))
     # TODO
-    df_train = df_train.head(100)
+    if cfg.is_debug:
+        df_train = df_train.head(200)
     df_context_grp_1 = pd.read_csv(os.path.join(cfg.dir_own_dataset, 'df_context_grp_1.csv'))
     # form text column
     df_train.loc[:, 'context_grp_1'] = df_train.context.apply(lambda x: x[0])
@@ -102,18 +100,15 @@ def train_model(version, with_wandb):
         cfg.logger.info(f"========== CV ==========")
         get_result(df_valid, cfg)
 
-        dir_df_valid = os.path.join(cfg.dir_output, 'df_valid')
-        if not os.path.exists(dir_df_valid):
-            os.makedirs(dir_df_valid)
-        df_valid.to_pickle(os.path.join(dir_df_valid, 'df.pkl'))
+        df_valid.to_pickle(os.path.join(cfg.dir_output, 'df_valid.pkl'))
 
     if cfg.with_wandb:
         wandb.finish()
 
 
-def predict_result(version, with_wandb):
+def predict_result(version, is_debug, device=None):
 
-    cfg = Cfg(version, with_wandb)
+    cfg = Cfg(version, is_debug=is_debug, with_wandb=False, device=device)
 
     current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     message_status = highlight_string(f'predict by {cfg.version} model at {current_time}')
@@ -141,10 +136,10 @@ def predict_result(version, with_wandb):
     predictions = []
     for fold in cfg.trn_fold:
         model = CustomModel(cfg,
-                            config_path=os.path.join(cfg.dir_output, 'config', 'model.config'),
+                            config_path=os.path.join(cfg.dir_output, 'model.config'),
                             pretrained=False)
         state = torch.load(os.path.join(cfg.dir_output, 'model', f"fold_{fold}_best.model"),
-                           map_location=torch.device('cpu'))
+                           map_location=torch.device(cfg.device))
         model.load_state_dict(state['model'])
 
         prediction = inference_fn(test_loader, model, 'cpu')
@@ -159,6 +154,12 @@ def predict_result(version, with_wandb):
 
 if __name__ == '__main__':
 
-    version = 'v2.0.8'
-    train_model(version, False)
-    predict_result(version, False)
+    version = 'v3.1.1'
+    is_debug = False
+    # train_model(version, True, is_debug=is_debug)
+    # predict_result(version, is_debug=is_debug, device='cpu')
+
+    df = pd.read_pickle('output/v3.1.1/df_valid.pkl')
+    # df.to_csv('output/v3.1.1/df_valid.csv')
+    print(df.fold.value_counts())
+    print(df.head())
