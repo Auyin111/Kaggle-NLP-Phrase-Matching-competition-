@@ -100,7 +100,7 @@ def train_model(version, with_wandb, is_debug=False, device=None):
         cfg.logger.info(f"========== CV ==========")
         get_result(df_valid, cfg)
 
-        df_valid.to_pickle(os.path.join(cfg.dir_output, 'df_valid.pkl'))
+        df_valid.to_csv(os.path.join(cfg.dir_output, 'df_valid.csv'), index=False)
 
     if cfg.with_wandb:
         wandb.finish()
@@ -142,7 +142,7 @@ def predict_result(version, is_debug, device=None):
                            map_location=torch.device(cfg.device))
         model.load_state_dict(state['model'])
 
-        prediction = inference_fn(test_loader, model, 'cpu')
+        prediction = inference_fn(test_loader, model, cfg.device)
         predictions.append(prediction)
         del model, state, prediction;
         gc.collect()
@@ -157,9 +157,11 @@ if __name__ == '__main__':
     version = 'v3.1.1'
     is_debug = False
     # train_model(version, True, is_debug=is_debug)
-    # predict_result(version, is_debug=is_debug, device='cpu')
+    predict_result(version, is_debug=is_debug,
+                   # device='cpu'
+                   )
 
-    df = pd.read_pickle('output/v3.1.1/df_valid.pkl')
+    df = pd.read_csv(os.path.join('output', version, 'df_valid.csv'))
     # df.to_csv('output/v3.1.1/df_valid.csv')
     print(df.fold.value_counts())
     print(df.head())
