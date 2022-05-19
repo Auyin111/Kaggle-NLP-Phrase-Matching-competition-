@@ -11,7 +11,7 @@ from sklearn.model_selection import StratifiedKFold
 from utils import get_result
 import datetime
 from utils import highlight_string
-from gen_data.dataset import TestDataset
+from gen_data.dataset import TestDataset, find_max_len
 from torch.utils.data import DataLoader
 from model.model import CustomModel
 from train_predict.inference import inference_fn
@@ -34,7 +34,7 @@ def train_model(version, with_wandb, is_debug=False, device=None):
     cfg = Cfg(version, with_wandb, is_debug=is_debug, device=device)
 
     current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    message_status = highlight_string(f'start train {cfg.version} model at {current_time}')
+    message_status = highlight_string(f'start train {cfg.version} model at {current_time} (is_debug: {cfg.is_debug})')
     cfg.logger.info(message_status)
 
     if cfg.with_wandb:
@@ -63,10 +63,20 @@ def train_model(version, with_wandb, is_debug=False, device=None):
     df_train.loc[:, 'context_grp_1'] = df_train.context.apply(lambda x: x[0])
     df_train = df_train.merge(df_context_grp_1, how='left', on='context_grp_1')
     assert df_train.text_grp_1.isnull().sum() == 0, 'some of the context text are missing'
+
+    # tokenizer
+    cfg.tokenizer = AutoTokenizer.from_pretrained(cfg.pretrained_model)
+    dir_tokenizer = os.path.join(cfg.dir_output, 'tokenizer')
+    if not os.path.exists(dir_tokenizer):
+        os.makedirs(dir_tokenizer)
+    cfg.tokenizer.save_pretrained(dir_tokenizer)
+
     # TODO: map the context grp2 and update the text column
-    df_train['text'] = df_train.context_grp_1 + '[SEP]' \
-                       + df_train.anchor + '[SEP]' \
-                       + df_train.target + ['SEP']
+    df_train['text'] = df_train.anchor + '[SEP]' + df_train.target + ['SEP'] + df_train.text_grp_1
+
+    # find max_len
+    list_col_text = ['anchor', 'target', 'text_grp_1']
+    cfg = find_max_len(cfg, df_train, list_col_text)
 
     df_train['score_map'] = df_train.score.map({0: 0, 0.25: 1, 0.5: 2, 0.75: 3, 1: 4})
 
@@ -76,13 +86,6 @@ def train_model(version, with_wandb, is_debug=False, device=None):
     for n, (train_index, val_index) in enumerate(fold.split(df_train, df_train['score_map'])):
         df_train.loc[val_index, 'fold'] = n
     df_train['fold'] = df_train.fold.astype(int)
-
-    tokenizer = AutoTokenizer.from_pretrained(cfg.pretrained_model)
-    dir_tokenizer = os.path.join(cfg.dir_output, 'tokenizer')
-    if not os.path.exists(dir_tokenizer):
-        os.makedirs(dir_tokenizer)
-    tokenizer.save_pretrained(dir_tokenizer)
-    cfg.tokenizer = tokenizer
 
     df_train.score.hist()
 
@@ -120,12 +123,15 @@ def predict_result(version, is_debug, device=None):
     df_test.loc[:, 'context_grp_1'] = df_test.context.apply(lambda x: x[0])
     df_test = df_test.merge(df_context_grp_1, how='left', on='context_grp_1')
     assert df_test.text_grp_1.isnull().sum() == 0, 'some of the context text are missing'
-    # TODO: map the context grp2 and update the text column
-    df_test['text'] = df_test.context_grp_1 + '[SEP]' \
-                      + df_test.anchor + '[SEP]' \
-                      + df_test.target + ['SEP']
 
     cfg.tokenizer = AutoTokenizer.from_pretrained(os.path.join(cfg.dir_output, 'tokenizer'))
+
+    # TODO: map the context grp2 and update the text column
+    df_test['text'] = df_test.anchor + '[SEP]' + df_test.target + ['SEP'] + df_test.text_grp_1
+
+    # find max_len
+    list_col_text = ['anchor', 'target', 'text_grp_1']
+    cfg = find_max_len(cfg, df_test, list_col_text)
 
     test_dataset = TestDataset(cfg, df_test)
     test_loader = DataLoader(test_dataset,
@@ -154,9 +160,9 @@ def predict_result(version, is_debug, device=None):
 
 if __name__ == '__main__':
 
-    version = 'v3.1.1'
-    is_debug = False
-    # train_model(version, True, is_debug=is_debug)
+    version = 'v3.3.0'
+    is_debug = True
+    train_model(version, True, is_debug=is_debug)
     predict_result(version, is_debug=is_debug,
                    # device='cpu'
                    )

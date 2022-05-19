@@ -1,5 +1,6 @@
 import torch
 from torch.utils.data import Dataset
+from tqdm import tqdm
 
 
 def prepare_input(cfg, text):
@@ -12,6 +13,35 @@ def prepare_input(cfg, text):
     for k, v in inputs.items():
         inputs[k] = torch.tensor(v, dtype=torch.long)
     return inputs
+
+
+def find_max_len(cfg, df, list_col_text):
+    """find the max length in the text"""
+
+    dict_col_text = {}
+
+    for col_text in list_col_text:
+
+        if col_text not in dict_col_text:
+            dict_col_text[col_text] = 0
+
+        for text in tqdm(df[col_text].fillna("")):
+            length = len(cfg.tokenizer(text, add_special_tokens=False)['input_ids'])
+
+            if length > dict_col_text[col_text]:
+                dict_col_text[col_text] = length
+
+    max_len = 0
+    for k, length in dict_col_text.items():
+        max_len += length
+    # CLS + SEP + SEP
+    max_len += len(list_col_text)
+    cfg.max_len = max_len
+
+    cfg.logger.info(f'dict_col_text: {dict_col_text}')
+    cfg.logger.info(f'cfg.max_len: {cfg.max_len}')
+
+    return cfg
 
 
 class TrainDataset(Dataset):
