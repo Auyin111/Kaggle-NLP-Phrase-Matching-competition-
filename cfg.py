@@ -62,8 +62,6 @@ class Cfg:
     batch_scheduler = True
     num_cycles = 0.5
     num_warmup_steps = 0
-    # TODO: define by data nature
-    max_len = 128
 
     # Model
     # pretrained_model = "microsoft/deberta-v3-large"
