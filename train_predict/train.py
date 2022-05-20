@@ -211,3 +211,12 @@ def train_loop(folds, fold,
     gc.collect()
 
     return valid_folds
+ 
+def criterion_corrcoef(predicts, labels):
+    """
+        predicts : 1D list of numerics
+        labels : 1D list of numerics
+    """
+    x = torch.tensor([predicts, labels])
+    corrcoef = torch.corrcoef(x)[0, 1]  # the [0,1] element is the correlation coefficeint in the matrix
+    return 1 - corrcoef
