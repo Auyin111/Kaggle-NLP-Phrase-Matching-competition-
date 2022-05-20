@@ -167,6 +167,8 @@ def train_loop(folds, fold,
     # loop
     # ====================================================
     criterion = nn.BCEWithLogitsLoss(reduction="mean")
+    # criterion = criterion_corrcoef
+    # criterion = criterion_CCC
 
     best_score = 0.
 
