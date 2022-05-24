@@ -1,5 +1,5 @@
 <details>
-<summary>Set up linux, NVIDIA and env in paperspace</summary>
+<summary>Set up cloud and run main.py</summary>
 
 _______________________________________
 

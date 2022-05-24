@@ -5,6 +5,7 @@ from utils import cp_child_content
 
 if __name__ == '__main__':
 
+    # TODO: use reference path
     dir_source = r"C:\Users\auyin11\PycharmProjects\competition_patent"
     dir_destination = r"C:\Users\auyin11\PycharmProjects\competition_patent_upload"
 
