@@ -11,7 +11,8 @@ if __name__ == '__main__':
     selected_version = None # 'v3.1.1'
 
     list_cp_content = ['model', 'own_dataset', 'train_predict', 'gen_data',
-                       'cfg.py', 'main.py', 'utils.py', 'linux_pantent_requirement.txt', 'kaggle']
+                       'cfg.py', 'main.py', 'utils.py', 'kaggle',
+                       'paperspace_setup.sh', 'linux_pantent_requirement.txt', 'run_main.sh']
 
     shutil.rmtree(dir_destination)
 
