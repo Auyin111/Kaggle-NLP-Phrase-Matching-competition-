@@ -19,16 +19,15 @@ scp -r C:\Users\auyin11\PycharmProjects\competition_patent_upload USERNAME@IP:./
 ssh USERNAME@IP
 ```
 
-2.1. setup paperspace cloud
+4. setup paperspace cloud or lambda gpu cloud
 ```commandline
 bash competition_patent_upload/paperspace_setup.sh
 ```
-2.2. setup lambda gpu cloud
 ```commandline
 bash competition_patent_upload/lambda_labs_setup.sh
 ```
 
-3. run main.py
+5. run main.py
 ```commandline
 bash competition_patent_upload/run_main.sh
 ```
