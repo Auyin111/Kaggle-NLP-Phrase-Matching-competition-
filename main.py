@@ -17,6 +17,7 @@ from model.model import CustomModel
 from train_predict.inference import inference_fn
 from transformers import AutoTokenizer
 from cfg import Cfg
+from gen_data.dataset import create_text, merge_context
 
 warnings.filterwarnings("ignore")
 pd.set_option('display.max_rows', 500)
@@ -58,11 +59,9 @@ def train_model(version, with_wandb, is_debug=False, device=None):
     # TODO
     if cfg.is_debug:
         df_train = df_train.head(200)
-    df_context_grp_1 = pd.read_csv(os.path.join(cfg.dir_own_dataset, 'df_context_grp_1.csv'))
-    # form text column
-    df_train.loc[:, 'context_grp_1'] = df_train.context.apply(lambda x: x[0])
-    df_train = df_train.merge(df_context_grp_1, how='left', on='context_grp_1')
-    assert df_train.text_grp_1.isnull().sum() == 0, 'some of the context text are missing'
+
+    df_train = merge_context(df_train, cfg)
+    df_train = create_text(df_train)
 
     # tokenizer
     cfg.tokenizer = AutoTokenizer.from_pretrained(cfg.pretrained_model)
@@ -71,11 +70,8 @@ def train_model(version, with_wandb, is_debug=False, device=None):
         os.makedirs(dir_tokenizer)
     cfg.tokenizer.save_pretrained(dir_tokenizer)
 
-    # TODO: map the context grp2 and update the text column
-    df_train['text'] = df_train.anchor + '[SEP]' + df_train.target + ['SEP'] + df_train.text_grp_1
-
     # find max_len
-    list_col_text = ['anchor', 'target', 'text_grp_1']
+    list_col_text = ['anchor', 'target', 'text_grp_1', 'text_grp_2']
     cfg = find_max_len(cfg, df_train, list_col_text)
 
     df_train['score_map'] = df_train.score.map({0: 0, 0.25: 1, 0.5: 2, 0.75: 3, 1: 4})
@@ -118,19 +114,14 @@ def predict_result(version, is_debug, device=None):
     cfg.logger.info(message_status)
 
     df_test = pd.read_csv(os.path.join(cfg.dir_data, 'test.csv'))
-    df_context_grp_1 = pd.read_csv(os.path.join(cfg.dir_own_dataset, 'df_context_grp_1.csv'))
-    # form text column
-    df_test.loc[:, 'context_grp_1'] = df_test.context.apply(lambda x: x[0])
-    df_test = df_test.merge(df_context_grp_1, how='left', on='context_grp_1')
-    assert df_test.text_grp_1.isnull().sum() == 0, 'some of the context text are missing'
+
+    df_test = merge_context(df_test, cfg)
+    df_test = create_text(df_test)
 
     cfg.tokenizer = AutoTokenizer.from_pretrained(os.path.join(cfg.dir_output, 'tokenizer'))
 
-    # TODO: map the context grp2 and update the text column
-    df_test['text'] = df_test.anchor + '[SEP]' + df_test.target + ['SEP'] + df_test.text_grp_1
-
     # find max_len
-    list_col_text = ['anchor', 'target', 'text_grp_1']
+    list_col_text = ['anchor', 'target', 'text_grp_1', 'text_grp_2']
     cfg = find_max_len(cfg, df_test, list_col_text)
 
     test_dataset = TestDataset(cfg, df_test)
@@ -160,7 +151,7 @@ def predict_result(version, is_debug, device=None):
 
 if __name__ == '__main__':
 
-    version = 'v3.3.0'
+    version = 'v3.3.0.6'
     is_debug = True
     train_model(version, True, is_debug=is_debug)
     predict_result(version, is_debug=is_debug,
@@ -168,6 +159,5 @@ if __name__ == '__main__':
                    )
 
     df = pd.read_csv(os.path.join('output', version, 'df_valid.csv'))
-    # df.to_csv('output/v3.1.1/df_valid.csv')
     print(df.fold.value_counts())
     print(df.head())

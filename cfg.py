@@ -26,10 +26,12 @@ class Cfg:
 
         self.is_debug = is_debug
         if self.is_debug:
+            self.batch_size = 4
             self.epochs = 2
             self.n_fold = 2
             self.trn_fold = [0, 1]
         else:
+            self.batch_size = 16
             self.epochs = 5
             # CV
             self.n_fold = 4
@@ -57,7 +59,6 @@ class Cfg:
 
     # training
     num_workers = 4
-    batch_size = 16
     scheduler = 'cosine'  # ['linear', 'cosine']
     batch_scheduler = True
     num_cycles = 0.5
