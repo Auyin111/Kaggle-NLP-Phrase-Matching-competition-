@@ -1,7 +1,8 @@
 import re
 import chromedriver_binary
-
+import time
 chromedriver_binary
+from selenium.webdriver.common.keys import Keys
 
 import pandas as pd
 from selenium import webdriver
@@ -26,7 +27,7 @@ def detect_mentioned_context(d):
 
 
 def remove_content_in_bracket(r):
-    return re.sub("[\(\[].*?[\)\]]", "", r)
+    return re.sub("[\(\[\{].*?[\)\]\}]", "", r)
 
 
 def clean_descriptions(d):
@@ -58,8 +59,10 @@ for group in all_groups:
     url = f'https://www.uspto.gov/web/patents/classification/cpc/html/cpc-{group}.html'
 
     driver.get(url)
-    contexts = [s.text for s in driver.find_elements_by_class_name("symbol")]
-    descriptions = [s.text for s in driver.find_elements_by_class_name("class-title")]
+    html = driver.find_element_by_tag_name('body')
+
+    contexts = [s.text for s in driver.find_elements_by_xpath("//span[@class='alink']//span[@class='alink']")]
+    descriptions = [s.text for s in driver.find_elements_by_xpath("//td[not(@span=2)]//div[@class='class-title']")]
 
     for c, d in zip(contexts, descriptions):
         if len(c) == 1:  # pure A, B, C context... dont know what to do for now, so just ignore
