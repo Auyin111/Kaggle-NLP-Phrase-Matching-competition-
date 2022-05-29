@@ -50,36 +50,40 @@ def find_max_len(cfg, df, list_col_text):
 
 def merge_context(df, cfg):
     df_context_grp_1 = pd.read_csv(os.path.join(cfg.dir_own_dataset, 'df_context_grp_1.csv'))
-    df_context_grp_2 = pd.read_csv(os.path.join(cfg.dir_own_dataset, 'df_context_grp_2.csv'))
     # form text column
     df.loc[:, 'context_grp_1'] = df.context.apply(lambda x: x[0])
     df = df.merge(df_context_grp_1, how='left', on='context_grp_1')
     assert df.text_grp_1.isnull().sum() == 0, 'some of the context text are missing'
-    df = df.merge(
-        df_context_grp_2.rename(columns={'description': 'text_grp_2', 'mentioned_groups': 'mentioned_groups_grp_2'}),
-        how='left', on='context')
 
-    # check the missing of grp_2 context
-    ar_missing_grp_2 = df[
-        df['text_grp_2'].isnull() | df['mentioned_groups_grp_2'].isnull()].context.unique()
-    if len(ar_missing_grp_2) > 0:
+    if cfg.use_grp_2:
+        df_context_grp_2 = pd.read_csv(os.path.join(cfg.dir_own_dataset, 'df_context_grp_2.csv'))
 
-        message = highlight_string(f'the following grp 2 are missing: {ar_missing_grp_2}', '!')
-        cfg.logger.warning(message)
+        df = df.merge(
+            df_context_grp_2.rename(columns={'description': 'text_grp_2', 'mentioned_groups': 'mentioned_groups_grp_2'}),
+            how='left', on='context')
 
-        message = highlight_string(f"missing rate:\n{df[['text_grp_2', 'mentioned_groups_grp_2']].isnull().mean()}",
-                                   '!')
-        cfg.logger.warning(message)
+        # check the missing of grp_2 context
+        ar_missing_grp_2 = df[
+            df['text_grp_2'].isnull() | df['mentioned_groups_grp_2'].isnull()].context.unique()
+        if len(ar_missing_grp_2) > 0:
+
+            message = highlight_string(f'the following grp 2 are missing: {ar_missing_grp_2}', '!')
+            cfg.logger.warning(message)
+
+            message = highlight_string(f"missing rate:\n{df[['text_grp_2', 'mentioned_groups_grp_2']].isnull().mean()}",
+                                       '!')
+            cfg.logger.warning(message)
 
     return df
 
 
-def create_text(df):
+def create_text(df, use_grp_2=True):
 
     df['text'] = df.anchor + '[SEP]' + df.target + ['SEP'] + df.text_grp_1
-    # only + ['SEP'] and text_grp_2 if text_grp_2 is not null
-    df.loc[:, 'text'] = np.where(df.text_grp_2.isnull(), df.text,
-                                 df.text + '[SEP]' + df.text_grp_2)
+    if use_grp_2:
+        # only + ['SEP'] and text_grp_2 if text_grp_2 is not null
+        df.loc[:, 'text'] = np.where(df.text_grp_2.isnull(), df.text,
+                                     df.text + '[SEP]' + df.text_grp_2)
 
     return df
 

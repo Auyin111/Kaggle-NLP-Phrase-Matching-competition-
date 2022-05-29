@@ -42,6 +42,9 @@ class Cfg:
             self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         print(f'using device: {self.device}')
 
+    # determine whether to use grp 2 context
+    use_grp_2 = True
+
     # dir and path
     dir_own_dataset = 'own_dataset'
 
@@ -80,9 +83,3 @@ class Cfg:
 
     # logger
     logger = get_logger(os.path.join('output', 'train.log'))
-
-
-if __name__ == '__main__':
-
-    cfg = Cfg()
-    print(cfg.version)

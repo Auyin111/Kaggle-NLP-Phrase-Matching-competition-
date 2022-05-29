@@ -61,7 +61,7 @@ def train_model(version, with_wandb, is_debug=False, device=None):
         df_train = df_train.head(200)
 
     df_train = merge_context(df_train, cfg)
-    df_train = create_text(df_train)
+    df_train = create_text(df_train, cfg.use_grp_2)
 
     # tokenizer
     cfg.tokenizer = AutoTokenizer.from_pretrained(cfg.pretrained_model)
@@ -71,7 +71,9 @@ def train_model(version, with_wandb, is_debug=False, device=None):
     cfg.tokenizer.save_pretrained(dir_tokenizer)
 
     # find max_len
-    list_col_text = ['anchor', 'target', 'text_grp_1', 'text_grp_2']
+    list_col_text = ['anchor', 'target', 'text_grp_1']
+    if cfg.use_grp_2:
+        list_col_text.append('text_grp_2')
     cfg = find_max_len(cfg, df_train, list_col_text)
 
     df_train['score_map'] = df_train.score.map({0: 0, 0.25: 1, 0.5: 2, 0.75: 3, 1: 4})
@@ -116,12 +118,14 @@ def predict_result(version, is_debug, device=None):
     df_test = pd.read_csv(os.path.join(cfg.dir_data, 'test.csv'))
 
     df_test = merge_context(df_test, cfg)
-    df_test = create_text(df_test)
+    df_test = create_text(df_test, cfg.use_grp_2)
 
     cfg.tokenizer = AutoTokenizer.from_pretrained(os.path.join(cfg.dir_output, 'tokenizer'))
 
     # find max_len
-    list_col_text = ['anchor', 'target', 'text_grp_1', 'text_grp_2']
+    list_col_text = ['anchor', 'target', 'text_grp_1']
+    if cfg.use_grp_2:
+        list_col_text.append('text_grp_2')
     cfg = find_max_len(cfg, df_test, list_col_text)
 
     test_dataset = TestDataset(cfg, df_test)
@@ -151,7 +155,7 @@ def predict_result(version, is_debug, device=None):
 
 if __name__ == '__main__':
 
-    version = 'v3.3.0.6'
+    version = 'v3.3.0.11'
     is_debug = True
     train_model(version, True, is_debug=is_debug)
     predict_result(version, is_debug=is_debug,
