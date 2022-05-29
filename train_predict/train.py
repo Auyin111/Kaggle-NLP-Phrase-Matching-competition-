@@ -167,8 +167,6 @@ def train_loop(folds, fold,
     # loop
     # ====================================================
     criterion = nn.BCEWithLogitsLoss(reduction="mean")
-    # criterion = criterion_corrcoef
-    # criterion = criterion_CCC
 
     best_score = 0.
 
@@ -213,44 +211,3 @@ def train_loop(folds, fold,
     gc.collect()
 
     return valid_folds
- 
-def criterion_corrcoef(predicts, labels):
-    """
-        Use the Pearson correlation coefficient as the loss.
-        predicts : 1D list of numerics
-        labels : 1D list of numerics
-        (the function of torch.corrcoef() needs to be newer version of pytorch)
-    """
-    x = torch.tensor([predicts, labels])
-    corrcoef = torch.corrcoef(x)[0, 1]  # the [0,1] element is the correlation coefficeint in the matrix
-    return 1 - corrcoef
-
- def criterion_CCC(predicts, labels):
-  """
-      Use the concordance correlation coefficient as the loss.
-      (reference: 
-        1. Evaluation of Error and Correlation-Based Loss Functions For Multitask Learning Dimensional \
-           Speech Emotion Recognition
-        2. https://discuss.pytorch.org/t/use-pearson-correlation-coefficient-as-cost-function/8739/6 \
-        3. https://discuss.pytorch.org/t/lins-concordance-correlation-coefficient-as-loss-function/24334
-      )
-      predicts : 1D list of numerics
-      labels : 1D list of numerics
-      (the function of torch.corrcoef() needs to be newer version of pytorch)
-  """ 
-    predicts_mean = torch.mean(predicts)
-    labels_mean = torch.mean(labels)
-    predicts_var = torch.var(predicts)
-    labels_var = torch.var(labels)
-    predicts_std = predicts_var.pow(0.5)
-    labels_std = labels_var.pow(0.5)
-
-    vx = y_true - torch.mean(y_true)
-    vy = y_hat - torch.mean(y_hat)
-    pcc = torch.corrcoef(x)[0, 1] 
-
-    ccc = (2 * pcc * predicts_std * labels_std) / \
-          (predicts_var + labels_var + (predicts_mean - labels_mean) ** 2)
-    return 1 - ccc
-  
-  
