@@ -73,6 +73,9 @@ def merge_context(df, cfg):
             message = highlight_string(f"missing rate:\n{df[['text_grp_2', 'mentioned_groups_grp_2']].isnull().mean()}",
                                        '!')
             cfg.logger.warning(message)
+        else:
+            message = highlight_string('Data quality checking: you are using grp_2 context and it do not have any missing')
+            cfg.logger.info(message)
 
     return df
 
