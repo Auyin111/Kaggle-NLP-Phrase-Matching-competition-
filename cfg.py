@@ -2,6 +2,7 @@ import os
 import torch
 from utils import get_logger
 from pathlib import Path
+import datetime
 
 
 class Cfg:
@@ -12,7 +13,8 @@ class Cfg:
 
         self.version = version
         self.with_wandb = with_wandb
-        self.dir_output = os.path.join('output', self.version)
+        self.current_time = datetime.datetime.now().strftime("%Y-%m-%d %H_%M_%S")
+        self.dir_output = os.path.join('output', f"{self.version} - {self.current_time}")
 
         # dir_data
         if os.path.exists('/kaggle/input'):

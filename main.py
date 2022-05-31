@@ -34,8 +34,7 @@ def train_model(version, with_wandb, is_debug=False, device=None):
     ####################################################
     cfg = Cfg(version, with_wandb, is_debug=is_debug, device=device)
 
-    current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    message_status = highlight_string(f'start train {cfg.version} model at {current_time} (is_debug: {cfg.is_debug})')
+    message_status = highlight_string(f'start train {cfg.version} model at {cfg.current_time} (is_debug: {cfg.is_debug})')
     cfg.logger.info(message_status)
 
     if cfg.with_wandb:
@@ -111,8 +110,7 @@ def predict_result(version, is_debug, device=None):
 
     cfg = Cfg(version, is_debug=is_debug, with_wandb=False, device=device)
 
-    current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    message_status = highlight_string(f'predict by {cfg.version} model at {current_time}')
+    message_status = highlight_string(f'predict by {cfg.version} model at {cfg.current_time}')
     cfg.logger.info(message_status)
 
     df_test = pd.read_csv(os.path.join(cfg.dir_data, 'test.csv'))
