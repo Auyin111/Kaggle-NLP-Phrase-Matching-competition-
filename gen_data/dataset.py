@@ -82,7 +82,7 @@ def merge_context(df, cfg):
 
 def create_text(df, use_grp_2=True):
 
-    df['text'] = df.anchor + '[SEP]' + df.target + ['SEP'] + df.text_grp_1
+    df['text'] = df.anchor + '[SEP]' + df.target + '[SEP]' + df.text_grp_1  # Fixed a minor bug: from ["SEP"] to "[SEP]"
     if use_grp_2:
         # only + ['SEP'] and text_grp_2 if text_grp_2 is not null
         df.loc[:, 'text'] = np.where(df.text_grp_2.isnull(), df.text,
