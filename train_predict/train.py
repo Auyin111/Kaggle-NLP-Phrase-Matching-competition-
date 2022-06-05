@@ -95,10 +95,10 @@ def valid_fn(valid_loader, model, swa_model, criterion, epoch, device, cfg):  # 
     model.eval()
     preds = []
     start = end = time.time()
-    for step, (inputs, labels) in enumerate(valid_loader):
-        for k, v in inputs.items():
-            inputs[k] = v.to(device)
-        labels = labels.to(device)
+    for step, inputs in enumerate(valid_loader):
+        inputs = {k: v.to(device) for k, v in inputs.items()}
+        labels = inputs["labels"]
+        inputs.pop("labels")
         batch_size = labels.size(0)
         with torch.no_grad():
             if epoch + 1 >= cfg.swa_start and cfg.use_swa and swa_model != None:
