@@ -38,7 +38,10 @@ class Cfg:
         self.device = device
         if self.device is None:
             self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        print(f'using device: {self.device}')
+        print(f'Using device: {self.device}')
+
+    # determine whether to use grp 2 context
+    use_grp_2 = True
 
     # dir and path
     dir_own_dataset = 'own_dataset'
@@ -56,9 +59,6 @@ class Cfg:
     print_freq = 100
 
     # training
-    num_workers = 4
-    batch_size = 16
-    scheduler = 'cosine'  # ['linear', 'cosine']
     batch_scheduler = True
     plot_lr = True  # (New)
 
@@ -69,7 +69,7 @@ class Cfg:
     batch_distribution = 'context'  # ['label', 'context', None]
 
     # Model
-    pretrained_model = "microsoft/deberta-v3-base"  # "microsoft/deberta-v3-base", "albert-base-v2"
+    pretrained_model = "albert-base-v2"  # "microsoft/deberta-v3-base", "albert-base-v2"
     target_size = 1  # Only in original model
 
     # Optimizer
@@ -84,6 +84,22 @@ class Cfg:
     weight_decay = 0.01
     gradient_accumulation_steps = 1
     max_grad_norm = 1000
+
+    # Stochastic weight average (New)
+    use_swa = False
+    early_stopping = True
+    swa_start = 8  # swa starts at this epoch
+    swa_lr = 1e-5
+    anneal_steps = 800
+
+    # Multi sample dropout (New)
+    dropout_prop = 0.2
+    dropout_sample_num = 4  # Number of multi sample dropout, 1 = no MSD
+    msd_average = False  # Use average output instead of sum output in multi sample dropout
+
+    # Self-Attention (New)
+    self_attention_head_num = 1
+    self_attention_dropout_prob = 0.1
 
     # logger
     logger = get_logger(os.path.join('output', 'train.log'))

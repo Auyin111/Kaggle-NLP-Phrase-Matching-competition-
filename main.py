@@ -163,12 +163,9 @@ def predict_result(version, is_debug, device=None):
 
 if __name__ == '__main__':
 
-    version = 'testing'
-    version_protection = True
+    version = 'albert-base-v2'
+    version_protection = False
     is_debug = False
-
-    #torch.cuda.empty_cache()
-    #gc.collect()
 
     train_model(version, False, is_debug=is_debug, version_protection= version_protection)
     predict_result(version, is_debug=is_debug,
