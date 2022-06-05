@@ -1,15 +1,19 @@
+import pandas as pd
+import os
+import numpy as np
 import torch
 from torch.utils.data import Dataset
 from tqdm import tqdm
 
 
-def prepare_input(cfg, text):
-
+def prepare_input(cfg, text):  # Modified for dynamic padding
     inputs = cfg.tokenizer(text,
-                           add_special_tokens=True,
-                           max_length=cfg.max_len,
-                           padding="max_length",
-                           return_offsets_mapping=False)
+                            add_special_tokens=True,
+                            truncation = True,
+                            max_length = cfg.max_len,
+                            padding = False if cfg.dynamic_padding else "max_length",
+                            return_offsets_mapping = False)
+
     for k, v in inputs.items():
         inputs[k] = torch.tensor(v, dtype=torch.long)
     return inputs
@@ -54,11 +58,18 @@ class TrainDataset(Dataset):
     def __len__(self):
         return len(self.labels)
 
+    def get_labels(self,item):
+        label = torch.tensor(self.labels[item], dtype=torch.float)
+        return label
+
     def __getitem__(self, item):
 
         inputs = prepare_input(self.cfg, self.texts[item])
         label = torch.tensor(self.labels[item], dtype=torch.float)
-        return inputs, label
+        input_dict = {"labels": label}
+        for k, v in inputs.items():
+            input_dict[k] = v
+        return input_dict
 
 
 class TestDataset(Dataset):

@@ -7,11 +7,12 @@ import time
 import os
 
 from torch.utils.data import DataLoader
-from gen_data.dataset import TrainDataset
-from model.model import CustomModel
-from torch.optim import AdamW
-from transformers import get_linear_schedule_with_warmup, get_cosine_schedule_with_warmup
-from utils import get_score
+from torch.optim import Adam, SGD, AdamW
+from torch.optim.swa_utils import AveragedModel, SWALR  ## New ##
+from torch.optim.lr_scheduler import CosineAnnealingLR  ## New ##
+
+from transformers import get_linear_schedule_with_warmup, get_cosine_schedule_with_warmup, DataCollatorWithPadding
+from utils import get_score, get_distribution, plot_lr_fn
 from utils import AverageMeter, timeSince
 from tqdm import tqdm
 
@@ -25,10 +26,10 @@ def train_fn(fold, train_loader, model, criterion, optimizer, epoch, scheduler,
     start = end = time.time()
     global_step = 0
 
-    for step, (inputs, labels) in tqdm(enumerate(train_loader)):
-        for k, v in inputs.items():
-            inputs[k] = v.to(device)
-        labels = labels.to(device)
+    for step, inputs in enumerate(train_loader):
+        inputs = {k: v.to(device) for k, v in inputs.items()}
+        labels = inputs["labels"]
+        inputs.pop("labels")
         batch_size = labels.size(0)
         with torch.cuda.amp.autocast(enabled=cfg.apex):
             y_preds = model(inputs)
@@ -46,14 +47,15 @@ def train_fn(fold, train_loader, model, criterion, optimizer, epoch, scheduler,
             if cfg.batch_scheduler:
                 scheduler.step()
         end = time.time()
-        if step % cfg.print_freq == 0 or step == (len(train_loader)-1):
+
+        if step % cfg.print_freq == 0 or step == (len(train_loader) - 1):
             print('Epoch: [{0}][{1}/{2}] '
                   'Elapsed {remain:s} '
                   'Loss: {loss.val:.4f}({loss.avg:.4f}) '
                   'Grad: {grad_norm:.4f}  '
                   'LR: {lr:.8f}  '
-                  .format(epoch+1, step, len(train_loader), 
-                          remain=timeSince(start, float(step+1)/len(train_loader)),
+                  .format(epoch + 1, step, len(train_loader),
+                          remain=timeSince(start, float(step + 1) / len(train_loader)),
                           loss=losses,
                           grad_norm=grad_norm,
                           lr=scheduler.get_lr()[0]))
@@ -81,13 +83,13 @@ def valid_fn(valid_loader, model, criterion, device, cfg):
         losses.update(loss.item(), batch_size)
         preds.append(y_preds.sigmoid().to('cpu').numpy())
         end = time.time()
-        if step % cfg.print_freq == 0 or step == (len(valid_loader)-1):
+        if step % cfg.print_freq == 0 or step == (len(valid_loader) - 1):
             print('EVAL: [{0}/{1}] '
                   'Elapsed {remain:s} '
                   'Loss: {loss.val:.4f}({loss.avg:.4f}) '
                   .format(step, len(valid_loader),
                           loss=losses,
-                          remain=timeSince(start, float(step+1)/len(valid_loader))))
+                          remain=timeSince(start, float(step + 1) / len(valid_loader))))
     predictions = np.concatenate(preds)
     predictions = np.concatenate(predictions)
     return losses.avg, predictions
@@ -100,8 +102,9 @@ def train_loop(folds, fold,
     cfg.logger.info(f"========== fold: {fold} training ==========")
 
     # ====================================================
-    # loader
+    # loader (Modified to support dynamic padding, batch sampler, swa
     # ====================================================
+
     train_folds = folds[folds['fold'] != fold].reset_index(drop=True)
     valid_folds = folds[folds['fold'] == fold].reset_index(drop=True)
     valid_labels = valid_folds['score'].values
@@ -109,14 +112,31 @@ def train_loop(folds, fold,
     train_dataset = TrainDataset(cfg, train_folds)
     valid_dataset = TrainDataset(cfg, valid_folds)
 
+    collator = DataCollatorWithPadding(cfg.tokenizer) if cfg.dynamic_padding else None
+
+    if cfg.batch_distribution == "label" or cfg.batch_distribution == "context":
+        distribution, weights = get_distribution(train_folds, cfg)
+        sampler = torch.utils.data.WeightedRandomSampler(weights, len(weights), replacement=False) #generator=cfg.generator)
+    else:
+        sampler = None
+
+    cfg.logger.info(f"Batch sampler: {cfg.batch_distribution}")
+    if cfg.batch_distribution == "label" or cfg.batch_distribution == "context":
+        cfg.logger.info(f"Distribution: {distribution}")
+
     train_loader = DataLoader(train_dataset,
                               batch_size=cfg.batch_size,
-                              shuffle=True,
-                              num_workers=cfg.num_workers, pin_memory=True, drop_last=True)
+                              shuffle=False,
+                              sampler=sampler,
+                              num_workers=cfg.num_workers,
+                              collate_fn=collator,
+                              pin_memory=True, drop_last=True)
     valid_loader = DataLoader(valid_dataset,
                               batch_size=cfg.batch_size,
                               shuffle=False,
-                              num_workers=cfg.num_workers, pin_memory=True, drop_last=False)
+                              num_workers=cfg.num_workers,
+                              collate_fn=collator,
+                              pin_memory=True, drop_last=False)
 
     # ====================================================
     # model & optimizer

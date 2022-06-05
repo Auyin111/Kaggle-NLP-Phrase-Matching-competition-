@@ -60,19 +60,27 @@ class Cfg:
     batch_size = 16
     scheduler = 'cosine'  # ['linear', 'cosine']
     batch_scheduler = True
-    num_cycles = 0.5
-    num_warmup_steps = 0
+    plot_lr = True  # (New)
+
+    # Batch loader (New)
+    batch_size = 16
+    num_workers = 4
+    dynamic_padding = True
+    batch_distribution = 'context'  # ['label', 'context', None]
 
     # Model
-    # pretrained_model = "microsoft/deberta-v3-large"
-    pretrained_model = "microsoft/deberta-v3-base"
-    encoder_lr = 2e-5
-    decoder_lr = 2e-5
-    min_lr = 1e-6
+    pretrained_model = "microsoft/deberta-v3-base"  # "microsoft/deberta-v3-base", "albert-base-v2"
+    target_size = 1  # Only in original model
+
+    # Optimizer
+    scheduler='cosine'  # ['linear', 'cosine', 'cosine_annealing']
+    num_cycles = 0.5  # For 'linear' or 'cosine' only
+    num_warmup_steps = 1000  # For 'linear' or 'cosine' only
+    encoder_lr = 3e-5
+    decoder_lr = 3e-5
+    min_lr = 3e-6
     eps = 1e-6
     betas = (0.9, 0.999)
-    fc_dropout = 0.2
-    target_size = 1
     weight_decay = 0.01
     gradient_accumulation_steps = 1
     max_grad_norm = 1000

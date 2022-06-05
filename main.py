@@ -17,6 +17,7 @@ from model.model import CustomModel
 from train_predict.inference import inference_fn
 from transformers import AutoTokenizer
 from cfg import Cfg
+from gen_data.dataset import create_text, merge_context
 
 warnings.filterwarnings("ignore")
 pd.set_option('display.max_rows', 500)
@@ -27,7 +28,7 @@ pd.set_option('display.width', 1000)
 # %env TOKENIZERS_PARALLELISM=true
 
 
-def train_model(version, with_wandb, is_debug=False, device=None):
+def train_model(version, with_wandb, is_debug=False, device=None, version_protection=True):
 
     # setting
     ####################################################
@@ -49,20 +50,23 @@ def train_model(version, with_wandb, is_debug=False, device=None):
 
     # start
     ####################################################
-    if not os.path.exists(cfg.dir_output):
-        os.makedirs(cfg.dir_output)
+
+    if version_protection == True:  # Allow disabling version protection for testing
+        if not os.path.exists(cfg.dir_output):
+          os.makedirs(cfg.dir_output)
+        else:
+            raise Exception(f'the version: {cfg.version} is used, please edit version before train model')
     else:
-        raise Exception(f'the version: {cfg.version} is used, please edit version before train model')
+        print("Version protection is off, make sure to turn it on for training competition models")
 
     df_train = pd.read_csv(os.path.join(cfg.dir_data, 'train.csv'))
     # TODO
     if cfg.is_debug:
         df_train = df_train.head(200)
-    df_context_grp_1 = pd.read_csv(os.path.join(cfg.dir_own_dataset, 'df_context_grp_1.csv'))
-    # form text column
-    df_train.loc[:, 'context_grp_1'] = df_train.context.apply(lambda x: x[0])
-    df_train = df_train.merge(df_context_grp_1, how='left', on='context_grp_1')
-    assert df_train.text_grp_1.isnull().sum() == 0, 'some of the context text are missing'
+
+    pd.options.display.max_colwidth = 100
+    df_train = merge_context(df_train, cfg)
+    df_train = create_text(df_train, cfg.use_grp_2)
 
     # tokenizer
     cfg.tokenizer = AutoTokenizer.from_pretrained(cfg.pretrained_model)
@@ -71,11 +75,10 @@ def train_model(version, with_wandb, is_debug=False, device=None):
         os.makedirs(dir_tokenizer)
     cfg.tokenizer.save_pretrained(dir_tokenizer)
 
-    # TODO: map the context grp2 and update the text column
-    df_train['text'] = df_train.anchor + '[SEP]' + df_train.target + ['SEP'] + df_train.text_grp_1
-
     # find max_len
     list_col_text = ['anchor', 'target', 'text_grp_1']
+    if cfg.use_grp_2:
+        list_col_text.append('text_grp_2')
     cfg = find_max_len(cfg, df_train, list_col_text)
 
     df_train['score_map'] = df_train.score.map({0: 0, 0.25: 1, 0.5: 2, 0.75: 3, 1: 4})
@@ -160,9 +163,14 @@ def predict_result(version, is_debug, device=None):
 
 if __name__ == '__main__':
 
-    version = 'v3.3.0'
-    is_debug = True
-    train_model(version, True, is_debug=is_debug)
+    version = 'testing'
+    version_protection = True
+    is_debug = False
+
+    #torch.cuda.empty_cache()
+    #gc.collect()
+
+    train_model(version, False, is_debug=is_debug, version_protection= version_protection)
     predict_result(version, is_debug=is_debug,
                    # device='cpu'
                    )
