@@ -4,5 +4,6 @@ submission.csv
 *testing.ipynb
 requirements.txt
 output/v*
+output/em*
 wandb
 .ipynb_checkpoints
