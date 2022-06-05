@@ -1,0 +1,137 @@
+context,description,mentioned_groups
+A01,agriculture; forestry; animal husbandry; hunting; trapping; fishing,G01; E01; C12; A01; A61; E02; E21; A23
+A21,baking; edible doughs,F23; A47; F24
+A22,butchering; meat treatment; processing poultry or fish,B02; A23; C07
+A23,"foods or foodstuffs; treatment thereof, not covered by other classes",B02; A21; A23; B26; A01; C11
+A24,tobacco; cigars; cigarettes; simulated smoking devices; smokers' requisites,A61
+A41,wearing apparel,D05; D06; A41; B26; D03
+A42,headwear,A41
+A43,footwear,
+A44,haberdashery; jewellery,A43
+A45,hand or travelling articles,A47; A41; B26; A61
+A46,brushware,B25
+A47,furniture; domestic articles or appliances; coffee mills; spice mills; suction cleaners in general,A45; B60; E03; E05; A46; B08; F16; A47; D06; B26; B68; E06
+A61,medical or veterinary science; hygiene,G01; C01; A46; A01; C11; A61; H01; A23; G03; H05
+A62,life-saving; fire-fighting,B64; G08; E21; A62; B63; A61; B05
+A63,sports; games; amusements,G09; G04; B63; A63; A61; G07
+A99,subject matter not otherwise provided for in this section,
+B01,physical or chemical processes or apparatus in general,G01; F24; C02; C12; B67; F04; B07; F16; B01; B44; B30; B05; B03; B65; A61; B04; F02
+B02,"crushing, pulverising, or disintegrating; preparatory treatment of grain for milling",F24; B03; A21; C12; B29; C08; A61; B22; F23; E21; A47; A23; D21; F25
+B03,separation of solid materials using liquids or using pneumatic tables or jigs; magnetic or electrostatic separation of solid materials from solid materials or fluids; separation by high-voltage electric fields,B03; C11; B65; B07; H01; B01
+B04,centrifugal apparatus or machines for carrying-out physical or chemical processes,B02; G01; F23; D06; B01; B07
+B05,"spraying or atomising in general; applying fluent materials to surfaces, in general",F16; B65; B60; B01; B29; F04; A61; B05
+B06,generating or transmitting mechanical vibrations in general,H03; G01; G10; B23; G05; B07; H04; B24
+B07,separating solids from solids; sorting,B04; B03; B23; A43; B07
+B08,cleaning,B03; A46; E01; B67; C23; B65; B07; B01; A47; A63; E04; H05; B05
+B09,disposal of solid waste; reclamation of contaminated soil,A01; E01
+B21,mechanical metal-working without essentially removing material; punching metal,B23; F27; B65; B22; F16; B21; B24; B30
+B22,casting; powder metallurgy,C22; B29; C21; B28
+B23,machine tools; metal-working not otherwise provided for,B23; C23; B22; F23; B24; B21; C25; H05
+B24,grinding; polishing,E01; B24; C25; B23; C09
+B25,hand tools; portable power-driven tools; manipulators,B60; A01; B08; H01; A43; F17; A46; B62; F22; B27; B23; G21; B65; A61; E21; B21; B66
+B26,hand cutting tools; cutting; severing,C14; A01; A47; D06; B24; B68; A43; A24; B23; B65; B21; B26; B31; G02; A21; C06; B43; B25; A41; C03; G03; A45; C13; A46; C10; B27; B29; A61; A22; B02; G07; B28
+B27,working or preserving wood or similar material; nailing or stapling machines in general,B27; B23; B29; A01; F26; F16; B44; B24; B25; D21; B28; E04; B05
+B28,"working cement, clay, or stone",B22; B29; B32; B28
+B29,working of plastics; working of substances in a plastic state in general,B29; B32
+B30,presses,B01; B65
+B31,"making articles of paper, cardboard or material worked in a manner analogous to paper; working paper, cardboard or material worked in a manner analogous to paper",D21; B27; B31; B32; B65
+B32,layered products,
+B33,additive manufacturing technology,
+B41,printing; lining machines; typewriters; stamps,G01; B43; H01; B44; G06; D06; C25; G03; B41; H03; B23; C23; B65; A22; H04; B26; C09; G07
+B42,bookbinding; albums; files; special printed matter,B31; B44; B25; B26; B27; A47; B42
+B43,writing or drawing implements; bureau accessories,A45; G09; B25; B42
+B44,decorative arts,C14; G09; B29; B44; B31; B41; B05
+B60,vehicles in general,B62; B60; E05; E01; A61; B61; F16; B21; H02
+B61,railways,B60; E01; G02; G05; B61; F16; H04; H02; B66
+B62,land vehicles for travelling otherwise than on rails,G01; F16; B62; B60; A01
+B63,ships or other waterborne vessels; related equipment,E02; F41; B60; B63; F42
+B64,aircraft; aviation; cosmonautics,B60; E21
+B65,conveying; packing; storing; handling thin or filamentary material,G09; B67; B07; B25; B41; F17; A24; B62; B03; E03; C05; B27; C10; B65; A61; B02; F23; E04; B66
+B66,hoisting; lifting; hauling,E06; G21; B65; A61; B61; E02; F41; E21; B63; A63; E04; B66
+B67,"opening, closing  bottles, jars or similar containers; liquid handling",G01; F24; E03; B67; B65; B08; F17; G07
+B68,saddlery; upholstery,
+B81,microstructural technology,H01; B01
+B82,nanotechnology,
+B99,subject matter not otherwise provided for in this section,
+C01,inorganic chemistry,C01
+C02,"treatment of water, waste water, sewage, or sludge",B63; C23; G21; B01
+C03,glass; mineral or slag wool,
+C04,cements; concrete; artificial stone; ceramics; refractories,C03; E04
+C05,fertilisers; manufacture thereof,A01; C05
+C06,explosives; matches,C01; C10; C07; C08; C04; F42
+C07,organic chemistry,C13; G01; C12; C07; C08; A61; A23; C09
+C08,organic macromolecular compounds; their preparation or chemical working-up; compositions based thereon,C13; C10; D01; C12; C07; B29; C08; D06; D21; C09
+C09,dyes; paints; polishes; natural resins; adhesives; compositions not otherwise provided for; applications of materials not otherwise provided for,C01; C12; B27; A61; C25; C03; C04; C09; B05
+C10,"petroleum, gas or coke industries; technical gases containing carbon monoxide; fuels; lubricants; peat",C01; G02; D01; A21; C08; C11; C06; B22; F16; H01; C03; C10; C07; B29; C23; G21; A61; E21; B21; C09
+C11,"animal or vegetable oils, fats, fatty substances or waxes; fatty acids therefrom; detergents; candles",B01; C09; A61
+C12,biochemistry; beer; spirits; wine; vinegar; microbiology; enzymology; mutation or genetic engineering,C01; G01; A21; A23; C12; C07; B08
+C13,sugar industry,C13; C12; C07; C08
+C14,skins; hides; pelts; leather,B29; B68; D06
+C21,metallurgy of iron,C22; C23; H05; C30
+C22,metallurgy; ferrous or non-ferrous alloys; treatment of alloys or non-ferrous metals,C23; C22; C25; C21; C06
+C23,"coating metallic material; coating material with metallic material; chemical surface treatment; diffusion treatment of metallic material; coating by vacuum evaporation, by sputtering, by ion implantation or by chemical vapour deposition, in general; inhibiting corrosion of metallic material or incrustation in general",B23; C21; C23; C11; C22; D06; B21; B44; C25; C03; C04; C09; C30
+C25,electrolytic or electrophoretic processes; apparatus therefor,C23; C30
+C30,crystal growth,B22; H01; C22; B01; B29; C21
+C40,combinatorial technology,G16
+C99,subject matter not otherwise provided for in this section,
+D01,natural or man-made threads or fibres; spinning,D02; B03; D01; D21; B65
+D02,yarns; mechanical finishing of yarns or ropes; warping or beaming,D02; D06; D07
+D03,weaving,
+D04,braiding; lace-making; knitting; trimmings; non-woven fabrics,D05; B27; A01; B65; A42; D02; B44; B21; D04; D06; A43; D03; B32
+D05,sewing; embroidering; tufting,D05; A47; D04; A41; B42
+D06,treatment of textiles or the like; laundering; flexible materials not otherwise provided for,D05; D06; D01; B31
+D07,ropes; cables other than electric,D02; F16; H01; E01; D04; A63; B65
+D10,"indexing scheme associated with sublasses of section d, relating to textiles",
+D21,paper-making; production of cellulose,B31; B65; D21; B27
+D99,subject matter not otherwise provided for in this section,
+E01,"construction of roads, railways, or bridges",B64; B61; E01; B08
+E02,hydraulic engineering; foundations; soil shifting,E02; E21
+E03,water supply; sewerage,E03; A47; E21; F17
+E04,building,F16; E02; E21; E01; E04; H05; E06
+E05,locks; keys; window or door fittings; safes,A45; F16; G08; B62; E05; E04
+E06,"doors, windows, shutters, or roller blinds in general; ladders",B62; A01; B64; A47; B63; E04
+E21,earth drilling; mining,E21; C09
+E99,subject matter not otherwise provided for in this section,
+F01,machines or engines in general; engine plants in general; steam engines,F24; B60; F04; B08; F16; B25; B63; G10; F01; F28; G21; F03; B64; F02; F23; F41; C09
+F02,combustion engines; hot-gas or combustion-product engine plants,G01; F01; B60; F04; G05; F02; F23; H01; G06; F25
+F03,"machines or engines for liquids; wind, spring, or weight motors; producing mechanical power or a reactive propulsive thrust, not otherwise provided for",F01; B60; F15; F04; F03; F16; F02
+F04,positive - displacement machines for liquids; pumps for liquids or elastic fluids,F02; H01; F04; H02; B65; F03
+F05,indexing schemes relating to engines or pumps in various subclasses of classes f01-f04,F04; F01; F03
+F15,fluid-pressure actuators; hydraulics or pneumatics in general,F15; C10; G05; F16; E02; G06; B63; C09; B05
+F16,engineering elements and units; general measures for producing and maintaining effective functioning of machines or installations; thermal insulation in general,F16
+F17,storing or distributing gases or liquids,G01; A62; F15; F04; G05; B65; F16; F23; G08; A47; B01; E04; F25; H01; F17
+F21,lighting,F21
+F22,steam generation,F01; F24; F22; F28; G21
+F23,combustion apparatus; combustion processes,A24; F23; F24; F02; C06; C11
+F24,heating; ranges; ventilating,F01; F24; F23; F22; E04; F03; B08
+F25,refrigeration or cooling; combined heating and refrigeration systems; heat pump systems; manufacture or storage of ice; liquefaction solidification of gases,F24; B60; C09; F04; B65; G12; B64; A47; F25; F17
+F26,drying,A45; F27; A01; B04; H01; B01; D06; A23; A47; C04
+F27,furnaces; kilns; ovens; retorts,F23
+F28,heat exchange in general,F01; F24; F22; F27; F28; B08; F16; F23; B01; F25
+F41,weapons,F41; G02; B26; A63; A01; F42
+F42,ammunition; blasting,E21; C06; F42
+F99,subject matter not otherwise provided for in this section,
+G01,measuring; testing,H03; G01; B60; E01; C12; A01; A61; B07; F21; G08; H01; B61; A63; H05
+G02,optics,A61
+G03,photography; cinematography; analogous techniques using waves other than optical waves; electrography; holography,G02; H04; G06; G03; B41; G11
+G04,horology,H03; G01; H01; G04; F42; F03
+G05,controlling; regulating,H03; G01; F15; G04; G05; G12; F16; H01; B22; H04; G06; H02; H05
+G06,computing; calculating; counting,H03; G01; G02; G07; G05; H04; G06; A63; B41; G11
+G07,checking-devices,G06; G07
+G08,signalling,G01; B61; F15; E01; G05
+G09,education; cryptography; display; advertising; seals,G01; G02; G09; G04; F21; G08; H01; G06; G03; H05; H03; A61; H04; A63; B42
+G10,musical instruments; acoustics,H03; G10; A47; G09; G04; A63; G11
+G11,information storage,G01; H01; H04; G06
+G12,instrument details,
+G16,information and communication technology  specially adapted for specific application fields,
+G21,nuclear physics; nuclear engineering,B64; G01; H01; G06; G21; A61; H05
+G99,subject matter not otherwise provided for in this section,
+H01,basic electric elements,H03; G01; G02; C04; H01; C22; H04; H02; H05
+H02,generation; conversion or distribution of electric power,H03; G01; H01; G08; H04; H02; G21
+H03,basic electronic circuitry,H03; G01; G10; G02; F15; G09; G05; G08; H01; H04; G06; G11; H02; H05
+H04,electric communication technique,G01; G10; G04; B06; G08; H01; H04; H02; G11
+H05,electric techniques not otherwise provided for,H03; G01; G04; A01; G21; A61; A22; H01; H04; G03; H02; H05
+H99,subject matter not otherwise provided for in this section,
+Y02,technologies or applications for mitigation or adaptation against climate change,
+Y04,information or communication technologies having an impact on other technology areas,
+Y10,technical subjects covered by former uspc,
