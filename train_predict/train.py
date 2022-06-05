@@ -5,6 +5,10 @@ import torch
 import torch.nn as nn
 import time
 import os
+from multiprocessing import Process  # For displaying learning rate plot without blocking
+
+from gen_data.dataset import TrainDataset
+from model.model import CustomModel, CustomModel_Original
 
 from torch.utils.data import DataLoader
 from torch.optim import Adam, SGD, AdamW
@@ -25,6 +29,7 @@ def train_fn(fold, train_loader, model, criterion, optimizer, epoch, scheduler,
     losses = AverageMeter()
     start = end = time.time()
     global_step = 0
+    lrs = []
 
     for step, inputs in enumerate(train_loader):
         inputs = {k: v.to(device) for k, v in inputs.items()}
@@ -59,10 +64,14 @@ def train_fn(fold, train_loader, model, criterion, optimizer, epoch, scheduler,
                           loss=losses,
                           grad_norm=grad_norm,
                           lr=scheduler.get_lr()[0]))
+
+        if cfg.plot_lr:
+            lrs.append(optimizer.param_groups[0]["lr"])
+
         if cfg.with_wandb:
             wandb.log({f"[fold{fold}] loss": losses.val,
                        f"[fold{fold}] lr": scheduler.get_lr()[0]})
-    return losses.avg
+    return losses.avg, lrs
 
 
 def valid_fn(valid_loader, model, criterion, device, cfg):
@@ -189,6 +198,7 @@ def train_loop(folds, fold,
     criterion = nn.BCEWithLogitsLoss(reduction="mean")
 
     best_score = 0.
+    lrs_list = []  # For plotting learning rates
 
     dir_model = os.path.join(cfg.dir_output, 'model',)
     if not os.path.exists(dir_model):
@@ -200,13 +210,14 @@ def train_loop(folds, fold,
         start_time = time.time()
 
         # train_predict
-        avg_loss = train_fn(fold, train_loader, model, criterion, optimizer, epoch, scheduler, cfg.device, cfg)
+        avg_loss, lrs = train_fn(fold, train_loader, model, swa_model, criterion, optimizer, epoch, scheduler, swa_scheduler, cfg.device, cfg)
 
         # eval
         avg_val_loss, predictions = valid_fn(valid_loader, model, criterion, cfg.device, cfg)
 
         # scoring
         score = get_score(valid_labels, predictions)
+        lrs_list += lrs
 
         elapsed = time.time() - start_time
 
