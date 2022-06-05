@@ -57,7 +57,11 @@ def train_model(version, with_wandb, is_debug=False, device=None, version_protec
         else:
             raise Exception(f'the version: {cfg.version} is used, please edit version before train model')
     else:
-        print("Version protection is off, make sure to turn it on for training competition models")
+        protection_message = highlight_string("Version protection is off, make sure to turn it on for training submission models")
+        cfg.logger.info(protection_message)
+
+    if (cfg.swa_start > cfg.epochs) and cfg.use_swa:  # Check if swa starts before the last epoch ends.
+        raise Exception("SWA is enabled but SWA starts after the last epoch.")
 
     df_train = pd.read_csv(os.path.join(cfg.dir_data, 'train.csv'))
     # TODO
