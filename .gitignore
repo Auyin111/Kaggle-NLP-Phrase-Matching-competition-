@@ -1,9 +1,15 @@
 task.md
-testing_2.py
 submission.csv
 *testing.ipynb
 requirements.txt
-output/v*
-output/em*
+output
+output/deb*
 wandb
 .ipynb_checkpoints
+
+# testing code
+test*
+create cv.py
+ensemble_model.py
+ensemble_code.ipynb
+Untitled.ipynb
