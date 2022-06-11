@@ -13,8 +13,7 @@ class Cfg:
 
         self.version = version
         self.with_wandb = with_wandb
-        self.current_time = datetime.datetime.now().strftime("%Y-%m-%d %H_%M_%S")
-        self.dir_output = os.path.join('output', f"{self.version} - {self.current_time}")
+        self.dir_output = os.path.join('output', f"{self.version}")
 
         # dir_data
         if os.path.exists('/kaggle/input'):
@@ -45,7 +44,7 @@ class Cfg:
         print(f'using device: {self.device}')
 
     # determine whether to use grp 2 context
-    use_grp_2 = True
+    use_grp_2 = False
 
     # dir and path
     dir_own_dataset = 'own_dataset'
