@@ -89,7 +89,7 @@ def get_result(oof_df, cfg):
     preds = oof_df['pred'].values
     score = get_score(labels, preds)
     cfg.logger.info(f'Score: {score:<.4f}')
-
+    return score
 
 class AverageMeter(object):
     """Computes and stores the average and current value"""

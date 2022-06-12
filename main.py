@@ -18,6 +18,8 @@ from train_predict.inference import inference_fn
 from transformers import AutoTokenizer
 from cfg import Cfg
 from gen_data.dataset import create_text, merge_context
+import sherpa
+import sherpa.algorithms.bayesian_optimization as bayesian_optimization
 
 warnings.filterwarnings("ignore")
 pd.set_option('display.max_rows', 500)
@@ -26,6 +28,41 @@ pd.set_option('display.width', 1000)
 
 # TODO: study what is it
 # %env TOKENIZERS_PARALLELISM=true
+
+def load_param_into_cfg(cfg, trial):
+    # set parameter with trial
+    cfg.criterion = trial.parameters['encoder_lr']
+    cfg.criterion = trial.parameters['decoder_lr']
+    cfg.criterion = trial.parameters['min_lr']
+    cfg.criterion = trial.parameters['eps']
+    cfg.criterion = trial.parameters['betas']
+    cfg.criterion = trial.parameters['fc_dropout']
+    cfg.criterion = trial.parameters['target_size']
+    cfg.criterion = trial.parameters['weight_decay']
+    cfg.criterion = trial.parameters['gradient_accumulation_steps']
+    cfg.criterion = trial.parameters['max_grad_norm']
+    cfg.logger.info("trail: ", trial.parameters)
+
+
+def k_fold_train_model_and_get_scores(cfg, df_train):
+    scores = []
+    if cfg.train:
+        df_valid = pd.DataFrame()
+        for fold in range(cfg.n_fold):
+            if fold in cfg.trn_fold:
+                _df_valid = train_loop(df_train, fold, cfg)
+                df_valid = pd.concat([df_valid, _df_valid])
+                cfg.logger.info(f"========== fold: {fold} result ==========")
+                get_result(_df_valid, cfg)
+
+        df_valid = df_valid.reset_index(drop=True)
+        cfg.logger.info(f"========== CV ==========")
+        scores.append(get_result(df_valid, cfg))
+
+        df_valid.to_csv(os.path.join(cfg.dir_output, 'df_valid.csv'), index=False)
+    if cfg.with_wandb:
+        wandb.finish()
+    return scores
 
 
 def train_model(version, with_wandb, is_debug=False, device=None):
@@ -87,21 +124,34 @@ def train_model(version, with_wandb, is_debug=False, device=None):
 
     df_train.score.hist()
 
-    if cfg.train:
-        df_valid = pd.DataFrame()
-        for fold in range(cfg.n_fold):
-            if fold in cfg.trn_fold:
+    algorithm = bayesian_optimization.GPyOpt(max_concurrent=1, model_type='GP_MCMC', acquisition_type='EI_MCMC',
+                                             max_num_trials=10)
+    # parameters = [sherpa.Discrete('encoder_lr', [2, 50]),
+    #               sherpa.Choice('criterion', ['gini', 'entropy']),
+    #               sherpa.Continuous('max_features', [0.1, 0.9])]
 
-                _df_valid = train_loop(df_train, fold, cfg)
-                df_valid = pd.concat([df_valid, _df_valid])
-                cfg.logger.info(f"========== fold: {fold} result ==========")
-                get_result(_df_valid, cfg)
+    parameters = [sherpa.Continuous('encoder_lr', [2e-5, 10e-5]),
+                  sherpa.Continuous('decoder_lr', [2e-5, 10e-5]),
+                  sherpa.Continuous('min_lr', [1e-6, 10e-6]),
+                  sherpa.Continuous('eps', [2e-5, 10e-5]),
+                  sherpa.Continuous('betas', [2e-5, 10e-5]),
+                  sherpa.Continuous('fc_dropout', [2e-5, 10e-5]),
+                  sherpa.Continuous('target_size', [2e-5, 10e-5]),
+                  sherpa.Continuous('weight_decay', [2e-5, 10e-5]),
+                  sherpa.Continuous('gradient_accumulation_steps', [2e-5, 10e-5]),
+                  sherpa.Continuous('max_grad_norm', [0.1, 0.9])]
 
-        df_valid = df_valid.reset_index(drop=True)
-        cfg.logger.info(f"========== CV ==========")
-        get_result(df_valid, cfg)
-
-        df_valid.to_csv(os.path.join(cfg.dir_output, 'df_valid.csv'), index=False)
+    study = sherpa.Study(parameters=parameters,
+                         algorithm=algorithm,
+                         lower_is_better=False)
+    for trial in study:
+        cfg.logger.info("Trial ", trial.id, " with parameters ", trial.parameters)
+        load_param_into_cfg(cfg, trial)
+        scores = k_fold_train_model_and_get_scores(cfg, df_train)
+        cfg.logger.info("Scores: ", scores)
+        study.add_observation(trial, iteration=1, objective=sum(scores)/len(scores))
+        study.finalize(trial)
+    cfg.logger.info(study.get_best_result())
 
     if cfg.with_wandb:
         wandb.finish()
