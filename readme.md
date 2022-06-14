@@ -44,4 +44,6 @@ ___________________________________________________
     b. Some basic conflict checking (eg: Not using cross entropy for 5 catergoy output model)
   
     c. Option for disabling model checking (Auto-disable when is_debug == True)
+  
+    d. Saving the cfg.py and model.py used by the current version to the output directory right before training
     
