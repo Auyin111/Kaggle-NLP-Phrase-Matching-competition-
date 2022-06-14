@@ -3,9 +3,9 @@
 
 ___________________________________________________
   
-  1. Training Data:
-    a. Support Google translate dataset augmentation (Only tried en + zh, not really working in the 1st try)
-    b. Group 2 context (short/medium/long) + mentioned groups (current not used, looking for the best way to use them)
+  1. Training Data: \n
+    a. Support Google translate dataset augmentation (Only tried en + zh, not really working in the 1st try) \n
+    b. Group 2 context (short/medium/long) + mentioned groups (current not used, looking for the best way to use them) \n
   
   2. CustomModel:
     a. Multi Sampler Dropout
