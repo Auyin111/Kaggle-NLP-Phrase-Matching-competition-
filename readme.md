@@ -3,7 +3,7 @@
 
 ___________________________________________________
   
-  1. Training Data: \n
+  1. Training Data: 
   
     a. Support Google translate dataset augmentation (Only tried en + zh, not really working in the 1st try) 
   
