@@ -70,6 +70,7 @@ class Cfg:
     # Model
     # pretrained_model = "microsoft/deberta-v3-large"
     pretrained_model = "microsoft/deberta-v3-base"
+    # pretrained_model = "albert-base-v2"
     encoder_lr = 2e-5
     decoder_lr = 2e-5
     min_lr = 1e-6

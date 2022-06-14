@@ -15,5 +15,3 @@ tqdm==4.64.0
 matplotlib==3.5.2
 joblib==1.1.0
 pyqt==5.12.3
-
-sherpa==sherpa-4.13.1

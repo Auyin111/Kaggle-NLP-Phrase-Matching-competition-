@@ -41,7 +41,6 @@ def load_param_into_cfg(cfg, trial):
     cfg.criterion = trial.parameters['weight_decay']
     cfg.criterion = trial.parameters['gradient_accumulation_steps']
     cfg.criterion = trial.parameters['max_grad_norm']
-    cfg.logger.info("trail: ", trial.parameters)
 
 
 def k_fold_train_model_and_get_scores(cfg, df_train):
@@ -145,10 +144,10 @@ def train_model(version, with_wandb, is_debug=False, device=None):
                          algorithm=algorithm,
                          lower_is_better=False)
     for trial in study:
-        cfg.logger.info("Trial ", trial.id, " with parameters ", trial.parameters)
+        cfg.logger.info(f"Trial {trial.id} with parameters {trial.parameters}" )
         load_param_into_cfg(cfg, trial)
         scores = k_fold_train_model_and_get_scores(cfg, df_train)
-        cfg.logger.info("Scores: ", scores)
+        cfg.logger.info(f"Scores: {scores}")
         study.add_observation(trial, iteration=1, objective=sum(scores)/len(scores))
         study.finalize(trial)
     cfg.logger.info(study.get_best_result())
@@ -205,9 +204,9 @@ def predict_result(version, is_debug, device=None):
 
 if __name__ == '__main__':
 
-    version = 'v3.3.0.11'
+    version = 'v4.1.6'
     is_debug = True
-    train_model(version, True, is_debug=is_debug)
+    train_model(version, with_wandb=True, is_debug=is_debug, device='cuda')
     predict_result(version, is_debug=is_debug,
                    # device='cpu'
                    )
