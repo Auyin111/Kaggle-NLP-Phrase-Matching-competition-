@@ -1,5 +1,5 @@
 <details>
-<summary>v4.0.0 (reference model)</summary>
+<summary>v4.0.0</summary>
 
 ___________________________________________________
   
