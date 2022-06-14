@@ -19,7 +19,7 @@ scp -r C:\Users\auyin11\PycharmProjects\competition_patent_upload USERNAME@IP:./
 ssh USERNAME@IP
 ```
 
-4. setup paperspace cloud or lambda gpu cloud
+  4. setup paperspace cloud <mark>(the display driver is only for A4000 or A5000)</mark> or lambda gpu cloud
 ```commandline
 bash competition_patent_upload/paperspace_setup.sh
 ```
