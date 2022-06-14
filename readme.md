@@ -1,50 +1,29 @@
 <details>
-<summary>v3.1.1 (reference model)</summary>
+<summary>v4.0.0 (reference model)</summary>
 
 ___________________________________________________
-
-- When to stop the training? 
-  - train with all epoch and replace original model if Pearson correlation is better
-- What is the original ensemble method? 
-  - use 4 cross validation model to predict 4 score then average 4 score
-- cv score in kaggle: xxx
-</details>
-
-<details>
-<summary>Set up linux, NVIDIA and env in paperspace</summary>
-
-_______________________________________
-connect to server
-```commandline
-ssh paperspace@74.82.31.113 -i C:\Users\auyin11\key_pair\paperspace_key
-```
-Update and upgrade your Ubuntu instance
-```commandline
-sudo apt update
-sudo apt upgrade 
-```
-Download and install NVIDIA driver
-```commandline
-wget https://us.download.nvidia.com/XFree86/Linux-x86_64/465.27/NVIDIA-Linux-x86_64-465.27.run
-sudo bash NVIDIA-Linux-x86_64-465.27.run
-```
-Check gpu status
-```commandline
-nvidia-smi
-```
-Install cuda
-```commandline
-sudo apt install nvidia-cuda-toolkit (may need to reboost)
-```
-Download and install anaconda
-```commandline
-wget https://repo.anaconda.com/archive/Anaconda3-2022.05-Linux-x86_64.sh
-bash Anaconda3-2022.05-Linux-x86_64.sh
-```
-Create env by txt file
-```commandline
-source anaconda3/bin/activate
-conda create -n patent_comp --file linux_pantent_requirement.txt -c pytorch -c conda-forge
-```
-<br>
-</details>
+  
+  1. Training Data:
+    a. Support Google translate dataset augmentation (Only tried en + zh, not really working in the 1st try)
+    b. Group 2 context (short/medium/long) + mentioned groups (current not used, looking for the best way to use them)
+  
+  2. CustomModel:
+    a. Multi Sampler Dropout
+    b. Multi Head Self-Attention model head
+    c. Weighted sum output of pretrained model layers
+    d. Support 5 category output
+  
+  3. Loss function:
+    BCE + BCEwithLogits + MSE + CCC1 + CCC2 (~CCC1 times training size) + PCC + Cross Entropy (for 5 category output only)
+   
+  4. Training/Optimizer:
+    a. Stochastic weight average (swa) (Not really working ...)
+    b. Cosine Annealing LR scheduler (For swa, but no warm-up available)
+    c. Dynamic Padding (Improves training speed ~ 30-100%)
+    d. Batch Sampler - by label or context (by context seems providing more stable training progress)
+    
+  5. Others
+    a. Plot learning rate during training (Only useful for debug)
+    b. Some basic conflict checking (eg: Not using cross entropy for 5 catergoy output model)
+    c. Option for disabling model checking (Auto-disable when is_debug == True)
+    
