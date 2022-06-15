@@ -86,7 +86,10 @@ def get_score(y_true, y_pred):
 
 
 def get_result(oof_df, cfg):
-    labels = oof_df['score'].values
+    labels = oof_df['score']
+    if cfg.target_size == 5:
+        labels = labels.apply(lambda x: torch.argmax(x).item())
+
     preds = oof_df['pred'].values
     score = get_score(labels, preds)
     cfg.logger.info(f'Score: {score:<.4f}')
@@ -122,7 +125,6 @@ def timeSince(since, percent):
     es = s / (percent)
     rs = es - s
     return '%s (remain %s)' % (asMinutes(s), asMinutes(rs))
-
 
 def highlight_string(string, symbol='-'):
     str_len = len(string)

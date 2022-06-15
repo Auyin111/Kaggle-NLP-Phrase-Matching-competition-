@@ -6,7 +6,6 @@ from torch.utils.data import Dataset
 from tqdm import tqdm
 from utils import highlight_string
 
-
 def prepare_input(cfg, text):  # Modified for dynamic padding
     inputs = cfg.tokenizer(text,
                             add_special_tokens=True,
@@ -49,23 +48,28 @@ def find_max_len(cfg, df, list_col_text):
     return cfg
 
 
-def merge_context(df, cfg):
-    df_context_grp_1 = pd.read_csv(os.path.join(cfg.dir_own_dataset, 'df_context_grp_1.csv'))
+def merge_context(df, cfg, language=None):
+    if language is None:
+        df_context_grp_1 = pd.read_csv(os.path.join(cfg.dir_own_dataset, 'df_context_grp_1.csv'))
+    else:
+        df_context_grp_1 = pd.read_csv(os.path.join(cfg.dir_own_dataset, f'df_context_grp_1_{language.lower()}.csv'))
     # form text column
     df.loc[:, 'context_grp_1'] = df.context.apply(lambda x: x[0])
     df = df.merge(df_context_grp_1, how='left', on='context_grp_1')
-    assert df.text_grp_1.isnull().sum() == 0, 'some of the context text are missing'
+    #assert df.text_grp_1.isnull().sum() == 0, 'some of the context text are missing'
 
     if cfg.use_grp_2:
-        df_context_grp_2 = pd.read_csv(os.path.join(cfg.dir_own_dataset, 'df_context_grp_2.csv'))
+        if language is None:
+            df_context_grp_2 = pd.read_csv(os.path.join(cfg.dir_own_dataset, 'df_context_grp_2.csv'))
+        else:
+            df_context_grp_2 = pd.read_csv(os.path.join(cfg.dir_own_dataset, f'df_context_grp_2_{language.lower()}.csv'))
 
         df = df.merge(
             df_context_grp_2.rename(columns={'description': 'text_grp_2', 'mentioned_groups': 'mentioned_groups_grp_2'}),
             how='left', on='context')
 
         # check the missing of grp_2 context
-        ar_missing_grp_2 = df[
-            df['text_grp_2'].isnull() | df['mentioned_groups_grp_2'].isnull()].context.unique()
+        ar_missing_grp_2 = df[df['text_grp_2'].isnull()].context.unique()
         if len(ar_missing_grp_2) > 0:
 
             message = highlight_string(f'the following grp 2 are missing: {ar_missing_grp_2}', '!')
@@ -80,19 +84,20 @@ def merge_context(df, cfg):
 
     return df
 
+def create_text(df, use_grp_2=True, use_mentioned_groups=False):
 
-def create_text(df, use_grp_2=True):
-
-    df['text'] = df.anchor + '[SEP]' + df.target + '[SEP]' + df.text_grp_1
+    df['text'] = df.anchor + "[SEP]" + df.target + "[SEP]" + df.text_grp_1
     if use_grp_2:
-        # only + ['SEP'] and text_grp_2 if text_grp_2 is not null
+        # only + "[SEP]" and text_grp_2 if text_grp_2 is not null
         df.loc[:, 'text'] = np.where(df.text_grp_2.isnull(), df.text,
-                                     df.text + '[SEP]' + df.text_grp_2)
+                                     df.text + "; " + df.text_grp_2)  # Treat group1 and group2 context as same text, separating by "; " insteadt of "[SEP]"
+    if use_mentioned_groups:
+        df.loc[:, 'text'] = np.where(df.mentioned_groups_grp_2.isnull(), df.text, df.text + "[SEP]" + df.mentioned_groups_grp_2)
 
     return df
 
 
-class TrainDataset(Dataset):
+class TrainDataset(Dataset):  # Modified for dynamic padding
     def __init__(self, cfg, df):
 
         self.cfg = cfg

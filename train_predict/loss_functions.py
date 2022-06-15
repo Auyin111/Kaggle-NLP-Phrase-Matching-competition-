@@ -50,12 +50,6 @@ class CCCLoss1(nn.Module):
         cov = self.sum((pred - pred_mean) * (label - label_mean)) / (len(pred) - 1)
         pcc = cov / (pred_std * label_std)
         ccc = (2 * cov) / (pred_var + label_var + (pred_mean - label_mean) ** 2 + 1e-6)
-        # print(label_var)
-        # print(pred_var)
-        # print(label_std)
-        # print(pred_std)
-        # print(cov)
-        # print(pcc)
         return (1 - ccc).cuda() if torch.cuda.is_available() else (1 - ccc)
 
 

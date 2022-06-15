@@ -6,14 +6,14 @@ from utils import cp_child_content
 if __name__ == '__main__':
 
     # TODO: use reference path
-    dir_source = r"C:\Users\auyin11\PycharmProjects\competition_patent"
-    dir_destination = r"C:\Users\auyin11\PycharmProjects\competition_patent_upload"
+    dir_source = r"C:\Users\tommy\Desktop\Machine Learning\Kaggle\USPPPM\competition_patent"
+    dir_destination = r"C:\Users\tommy\Desktop\Machine Learning\Kaggle\USPPPM\competition_patent_upload"
 
-    selected_version = None # 'v3.1.1'
+    selected_version = "deberta-v3-base ver1" #
 
     list_cp_content = ['model', 'own_dataset', 'train_predict', 'gen_data',
-                       'cfg.py', 'main.py', 'utils.py', 'kaggle',
-                       'paperspace_setup.sh', 'linux_pantent_requirement.txt', 'run_main.sh']
+                       'cfg.py', 'main.py', 'utils.py', 'kaggle']
+                       # 'paperspace_setup.sh', 'linux_pantent_requirement.txt', 'run_main.sh']
 
     shutil.rmtree(dir_destination)
 

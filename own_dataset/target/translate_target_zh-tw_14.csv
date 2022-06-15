@@ -1,0 +1,501 @@
+,0
+coupling ratio,耦合比
+coupling ratio coefficient,耦合比係數
+curves,曲線
+electromechanical coupling factor,機電耦合係數
+response,回复
+angle,角度
+area of contact,接觸面積
+area of coupling,耦合面積
+degree of contact,接觸程度
+degree of coupling,耦合度
+impedance,阻抗
+inductance,電感
+mutual angle,互角
+mutual distance,相互距離
+primary inductance,初級電感
+primary turns,初級匝數
+primary turns inductance,初級匝數電感
+relative angle,相對角度
+relative distance,相對距離
+transformer impedance,變壓器阻抗
+transformer ratio,變比
+turns,轉彎
+turns factor,轉彎係數
+turns impedance,轉阻抗
+turns inductance,匝數電感
+turns ratio,匝數比
+winding factor,繞組係數
+winding ratio,捲繞比
+antenna radiation,天線輻射
+apparent coupling,表觀耦合
+apparent transfer coefficient,表觀傳遞係數
+apparent transfer coupling,表觀傳遞耦合
+coupling level,耦合水平
+coupling parameter,耦合參數
+effective transfer coefficient,有效傳遞係數
+effective transfer coupling,有效傳遞耦合
+factor map,因子圖
+mode impedance,模式阻抗
+mutual coupling coefficient,互耦係數
+net inductance,淨電感
+odd mode impedances,奇模阻抗
+power coupling coefficient,功率耦合係數
+production factor,生產要素
+radiation resistance,抗輻射性
+shunt susceptance,分流電納
+transfer coefficient,傳遞係數
+transfer factor,轉移因子
+bandwidth,帶寬
+circuit loaded,電路加載
+coil quality,線圈質量
+coupling fraction,耦合分數
+efficiency,效率
+electronic circuit,電子電路
+gain,獲得
+height level,高度水平
+measure level,測量水平
+motor,馬達
+ppm,ppm
+quality factor,品質因數
+relative factor,相對因素
+resonator quality,諧振器質量
+risk factor,風險因素
+second coupling coefficient,第二耦合係數
+tap ratio,抽頭比
+view factor,視野因素
+water level,水位
+addition reaction,加成反應
+circular,圓
+crank arm,曲柄臂
+crank disc,曲柄盤
+crank drive,曲柄驅動
+crank flange,曲柄法蘭
+crank pulley,曲柄皮帶輪
+crank shaft,曲軸
+crank web,曲柄網
+crankpin,曲柄銷
+crankshaft,曲軸
+elimination reaction,消除反應
+hook,鉤
+kicker,踢球者
+mechanical device,機械裝置
+polymerization,聚合
+sewing,縫紉
+winding,纏繞
+crank joint,曲柄接頭
+crank lever,曲柄桿
+crank shaped,曲柄形
+crank type,曲柄式
+lever,槓桿
+ville crank,維爾曲柄
+ville joint,維爾聯合
+ammunition,彈藥
+arm ball,手臂球
+arm linux,手臂Linux
+axle,軸
+bell crank,曲柄
+cam cycle,凸輪循環
+cam plants,凸輪植物
+cam shaft,凸輪軸
+chain conveyer,鍊式輸送機
+drive shaft,傳動軸
+heavy cranks,重型曲柄
+link,關聯
+linkage,連鎖
+pedal,踏板
+pedal pulse,踏板脈衝
+crystal,水晶
+crystal layer,結晶層
+crystal layer thin,結晶層薄
+crystal molecular,晶體分子
+crystal molecular thin,晶體分子薄
+crystalline,結晶的
+crystalline thin,結晶薄
+layer thin,薄層
+molecular,分子
+molecular thin,分子薄
+thin,薄的
+composite crystal,複合晶體
+computer monitor,電腦顯示器
+crystal piezoelectric,晶體壓電
+crystal salt,水晶鹽
+crystal semiconductor,晶體半導體
+crystal semiconductor thin,晶體半導體薄
+crystal thin films,晶體薄膜
+crystalline piezoelectric,晶體壓電
+display shrink,顯示縮小
+hard crystal,硬水晶
+heartbeat monitor,心跳監視器
+lcd,液晶顯示器
+monitor temperature,監控溫度
+multiple crystal,多晶
+oled,奧萊德
+reflection type,反射式
+semiconductor thin,半導體薄
+thick crystal,厚晶體
+thin client,瘦客戶端
+thin film semiconductor crystal,薄膜半導體晶體
+thin pipe,細管
+thin quartz crystals,薄石英晶體
+thin single crystal silicon films,單晶矽薄膜
+cement compositions,水泥組合物
+coating composition,塗料組合物
+coating material,塗層材料
+curable coating composition,可固化塗料組合物
+curable coating material,可固化塗料
+curable coating resin,可固化塗料樹脂
+curable curing composition,可固化固化組合物
+curable curing layer,可固化固化層
+curable curing resin,可固化固化樹脂
+curable curing resin composition,可固化固化樹脂組合物
+curable layer,固化層
+curable material,可固化材料
+curable resin,可固化樹脂
+curable resin composition,可固化樹脂組合物
+curable resin layer,可固化樹脂層
+curable resin material,可固化樹脂材料
+cure a patient,治愈一個病人
+curing acrylic compounds,固化丙烯酸化合物
+curing adhesives,固化粘合劑
+curing agent,固化劑
+curing agent composition,固化劑組合物
+curing coating composition,固化塗料組合物
+curing composition,固化組合物
+curing disease,治癒疾病
+curing layer,固化層
+curing material,固化材料
+curing oligomers formulation,固化低聚物配方
+curing particulates,固化顆粒
+curing polymer composition,固化聚合物組合物
+curing resin,固化樹脂
+epoxy resin curing agent,環氧樹脂固化劑
+hardening of a polymer,聚合物硬化
+hot curing resin composition,熱固化樹脂組合物
+inorganic formulation,無機配方
+medical care,醫療保健
+photocurable resin composition,光固化樹脂組合物
+thermosetting resins,熱固性樹脂
+uv curing resin composition,紫外光固化樹脂組合物
+agricultural waste,農業廢棄物
+call stack,調用棧
+cut and stack,切割和堆疊
+cut and stack labeling equipment,切割和堆疊貼標設備
+cut off from people,與人隔絕
+cut off marks,切斷標記
+cut off scores,截斷分數
+cut shoes,剪鞋
+cut stack,切堆棧
+die cuts,模切
+dry grass,乾草
+extract from stack,從堆棧中提取
+first chip stack,第一個芯片堆棧
+grass waste,草廢料
+printing labels,打印標籤
+product stacking,產品堆疊
+pull from stack,從堆棧中拉出
+remove from stack,從堆棧中刪除
+rolled sheet,軋製板
+separate from stack,與堆棧分離
+stacked labels,堆疊標籤
+adhesives,粘合劑
+binder,粘合劑
+binder dye,粘合劑染料
+concrete polymer,混凝土聚合物
+cyanoacrylate adhesives,氰基丙烯酸酯粘合劑
+cyanoacrylate chemical compound,氰基丙烯酸酯化合物
+cyanoacrylate polymer,氰基丙烯酸酯聚合物
+cyanoacrylate prepolymer,氰基丙烯酸酯預聚物
+cyanoacrylates,氰基丙烯酸酯
+digitally imaged lenticular products,數字成像透鏡產品
+dye,染料
+eye adhesive composition,眼膠組合物
+family of strong fast acting adhesives,強效快速粘合劑系列
+fibrous web,纖維網
+fishing polymer knot,釣魚聚合物結
+gelatin,明膠
+heat setting label sheet,熱定型標籤紙
+inkjet printable surface,噴墨打印表面
+paper web,紙網
+polymer musical instrument,高分子樂器
+polymer stem activity,聚合物莖活性
+polymerization of cyanoacrylate,氰基丙烯酸酯聚合
+silver binder,銀粘合劑
+silver dye,銀染料
+stamping,沖壓
+tile wall adhesive,瓷磚牆膠
+alcohol,酒精
+alcoholism,酗酒
+alcohols,醇類
+alcohols glycol,醇 乙二醇
+aliphatic,脂肪族
+aliphatic chain,脂肪鏈
+aliphatic glycol,脂肪族二醇
+bicyclic,雙環
+carveol,香芹酚
+chain,鏈
+common salt,食鹽
+cyclic,循環的
+cycloheptanol,環庚醇
+cyclohexanol,環己醇
+cyclopentanol,環戊醇
+cyclopropanol,環丙醇
+esters,酯類
+esters chain,酯鏈
+ethanol,乙醇
+glycol,乙二醇
+glycylglycitol,甘氨酰糖醇
+hydroxyl compounds,羥基化合物
+menthol,薄荷醇
+methanol,甲醇
+nacl salt,氯化鈉
+propanol,丙醇
+pulegol,胡蘆巴
+sodium chloride,氯化鈉
+sulphate,硫酸鹽
+aldehydes,醛類
+aldehydes alcohols,醛醇
+aliphatic aldehydes,脂肪醛
+aromatic,芳香
+aromatic alcohol,芳香醇
+aromatic alcohols,芳香醇
+aromatic hydrocarbons,芳香烴
+bicycle,自行車
+cyclic alcohol,環醇
+cyclic chain,環狀鏈
+cyclic motion,循環運動
+cyclobutanols,環丁醇
+cycloheptanols,環庚醇
+cyclohexanols,環己醇
+cyclopropanols,環丙醇
+hydroxyl functional group,羥基官能團
+inositol,肌醇
+lignin,木質素
+lignin acids,木質素酸
+phenolic alcohol,酚醇
+phenolic alcohols,酚醇
+phenols,酚類
+phenols acids,酚酸
+phenols alcohols,酚類醇類
+saturated aldehydes,飽和醛
+saturates alcohols,飽和醇
+saturates aldehydes,使醛飽和
+toluene,甲苯
+used as a drug,用作藥物
+10 bit dac,10位DAC
+ad circuit,到處走走
+ad conversion system,廣告轉換系統
+ad system,廣告系統
+adc,ADC
+adc system,ADC系統
+android system,安卓系統
+bit da converter,位數據轉換器
+conventional filter,常規過濾器
+conventional filter system,常規過濾系統
+conventional filtering system,常規過濾系統
+converter system,轉換器系統
+da circuit,電路
+da ic,達克
+da ic system,daic系統
+da system,大系統
+dac line diver,dac線潛水員
+digital to analog converter,數模轉換器
+filtering,過濾
+filtering system,過濾系統
+ic system,集成電路系統
+multi bit dac,多位DAC
+one bit converter,一位轉換器
+oversampling bit,過採樣位
+pipelined ad,流水線廣告
+pipelined ad converter,流水線廣告轉換器
+power conversion,電源轉換
+prior filter,優先過濾器
+prior filter system,以前的過濾系統
+prior filtering system,先前的過濾系統
+sigma delta ad converter,sigma delta 廣告轉換器
+sigma delta digital to analog converter,sigma delta 數模轉換器
+system design,系統設計
+system issue,系統問題
+system software,系統軟件
+time interleaved,時間交錯
+amplifier circuit,放大電路
+data analytics,數據分析
+data buffer,數據緩衝區
+data buffers,數據緩衝區
+data circuit,數據電路
+data device,數據設備
+data device circuit,數據設備電路
+data dq buffer,數據 dq 緩衝區
+data dq circuit,數據dq電路
+data driver,數據驅動
+data input circuit,數據輸入電路
+data latch circuit,數據鎖存電路
+data locker,資料櫃
+data output buffer,數據輸出緩衝器
+data packet,數據包
+data processing circuit,數據處理電路
+data processing memory,數據處理存儲器
+data provider circuit,數據提供電路
+data science,數據科學
+data storage circuit,數據存儲電路
+data storage memory,數據存儲器
+dq buffer,dq 緩衝區
+dq buffers,dq 緩衝區
+dq circuit,dq電路
+dq driver,dq 驅動程序
+driver,司機
+electronics,電子產品
+memory circuit,記憶電路
+memory device,記憶裝置
+memory device circuit,存儲設備電路
+memory processing circuit,記憶處理電路
+memory storage circuit,記憶儲存電路
+monitor output,監控輸出
+output control circuit,輸出控制電路
+pcb heat data,pcb熱數據
+processor,處理器
+processor circuit,處理器電路
+retry circuit,重試電路
+thermal analysis data,熱分析數據
+thermal sheet,導熱片
+transfer circuit,傳輸電路
+write circuit,寫電路
+body header,正文標題
+communication network,通訊網絡
+controlling idea,中心思想
+date nodes,日期節點
+day node,日節點
+day nodes,日節點
+display environment,顯示環境
+display model,顯示模型
+electronic data tree structure,電子數據樹結構
+environment,環境
+environment model,環境模型
+headers,標題
+hierarchical data structure,分層數據結構
+levels,水平
+node,節點
+node controller,節點控制器
+node controller program,節點控制器程序
+node controllers,節點控制器
+node level program,節點級程序
+node tree,節點樹
+non data tree,非數據樹
+number flow chart,號碼流程圖
+parameter tree,參數樹
+query pattern,查詢模式
+second data tree,第二個數據樹
+structure of server,服務器結構
+tree based data,基於樹的數據
+tree data,樹數據
+tree data structures,樹數據結構
+tree structured data,樹狀結構數據
+virtual environment,虛擬環境
+virtual model,虛擬模型
+appropriate decompression algorithm,合適的解壓算法
+bullet decompressor,子彈減壓器
+compressing performer,壓縮表演者
+compression encoder,壓縮編碼器
+decompress,解壓
+decompress expander,解壓擴展器
+decompresseor in pc,電腦解壓器
+decompression,減壓
+decompression engine,減壓引擎
+decompressor circuitry,解壓器電路
+decompressor lever,減壓器槓桿
+engine valve,發動機氣門
+expand wall,擴展牆
+expander,膨脹機
+header decompression module,頭解壓模塊
+increase head,增加頭
+parallel decompressor,並行解壓器
+physical pressure released,釋放物理壓力
+pressure reducer,減壓器
+restoring compressed,恢復壓縮
+un compressed data packet,未壓縮的數據包
+audio decompressor,音頻解壓器
+automatic decompressor,自動減壓器
+compression unit,壓縮單元
+computer terminal,電腦終端
+conditioning unit,調節單元
+decoder,解碼器
+decomposed leaves,腐爛的葉子
+decompression algorithm,解壓算法
+decompression unit,減壓裝置
+decompressor device,減壓裝置
+decryption,解密
+embedded decompressor,嵌入式解壓器
+encryption mechanism,加密機制
+genetic algorithm,遺傳算法
+header decompression,頭解壓
+header file,頭文件
+health unit,衛生單位
+physical pressure reducer,物理減壓器
+press type switch,按壓式開關
+chimeric molecules,嵌合分子
+climatic,氣候
+cre transcription factor decoy oligonucleotide,cre轉錄因子誘餌寡核苷酸
+decoy,誘餌
+decoy odns,誘餌
+decoy oligodeoxynucleotides,誘餌寡核苷酸
+decoy oligomers,誘餌低聚物
+decoy person,誘餌的人
+decoy receptor,誘餌受體
+decoy rna,誘餌RNA
+decoy sentence,誘餌句
+decoy system,誘餌系統
+decoy trap,誘餌
+device,設備
+nfb decoy oligonucleotide,nfb 誘餌寡核苷酸
+relate to decoy,與誘餌有關
+repellent,驅蟲劑
+stat3 decoy oligonucleotide,stat3 誘餌寡核苷酸
+transcription factor,轉錄因子
+transcription factor decoy,轉錄因子誘餌
+transcription factors,轉錄因子
+decrease file size,減小文件大小
+decrease image size,減小圖像大小
+decrease resolution of image,降低圖像分辨率
+decrease symbol,減少符號
+decreased operating power,工作功率下降
+decreased wbc count,白細胞計數減少
+decreasing order,降序
+deep sleep mode,深度睡眠模式
+full load power,滿載功率
+increased power,增加功率
+initial output power,初始輸出功率
+intended power,預期功率
+less power consumption,更少的功耗
+low power,低電量
+low voltage,低電壓
+lower energy consumption,降低能耗
+minimal electrical power,最小電力
+minimum,最低限度
+phase commands,相位命令
+positive,積極的
+power control cycle,功率控制週期
+predefined power,預定義的權力
+reduced,減少
+reduced low power,降低低功率
+reduced power,降低功率
+reduced voltage,降壓
+relatively low power,相對較低的功率
+relatively reduced power,相對降低功率
+stand by periods,待命時期
+temporary transition,臨時過渡
+addressing split modes,解決分裂模式
+area diameter,面積直徑
+area of a circle,圓的面積
+cell storage area,細胞儲存區
+control by memory,記憶控制
+define by election,選舉定義
+define by storage,按存儲定義
+defined area,定義區域
+defined memory,定義記憶
+defined memory array,定義的內存數組
+dsp unit,DSP單元
+in memory representation,在內存表示中
+internal storage,內部存儲器
+memory cell storage area,存儲單元存儲區
+non defined memory,未定義的記憶
+plurality of memory cells,多個存儲單元

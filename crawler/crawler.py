@@ -1,6 +1,10 @@
 import re
 import chromedriver_binary
+import warnings
+warnings.simplefilter(action='ignore', category=FutureWarning)
+warnings.simplefilter(action='ignore', category=DeprecationWarning)
 import time
+
 chromedriver_binary
 from selenium.webdriver.common.keys import Keys
 
@@ -10,7 +14,7 @@ from selenium.webdriver.chrome.options import Options
 
 # for mac envir only atm, need to install chromium driver
 options = Options()
-options.binary_location = '/Applications/Chromium.app/Contents/MacOS/Chromium'
+options.binary_location = 'C:\Program Files\Google\Chrome\Application\chrome.exe'
 options.headless = True
 driver = webdriver.Chrome(options=options)
 
@@ -32,6 +36,7 @@ def remove_content_in_bracket(r):
 
 def clean_descriptions(d):
     return remove_content_in_bracket(d).lower()
+
 
 # def get_all_context_group():
 #     for group in all_groups:
@@ -55,6 +60,7 @@ all_context = set({'B22', 'F22', 'F41', 'B25', 'D01', 'C06', 'E99', 'C14', 'A43'
                    'C05', 'G11', 'B41', 'H99', 'E06', 'F99', 'B26', 'C03', 'G06', 'B08'})
 
 result = pd.DataFrame(columns=['context', 'description', 'mentioned_groups'])
+
 for group in all_groups:
     url = f'https://www.uspto.gov/web/patents/classification/cpc/html/cpc-{group}.html'
 
@@ -64,17 +70,24 @@ for group in all_groups:
     contexts = [s.text for s in driver.find_elements_by_xpath("//span[@class='alink']//span[@class='alink']")]
     descriptions = [s.text for s in driver.find_elements_by_xpath("//td[not(@span=2)]//div[@class='class-title']")]
 
-    for c, d in zip(contexts, descriptions):
-        if len(c) == 1:  # pure A, B, C context... dont know what to do for now, so just ignore
+    for i, (c, d) in enumerate(zip(contexts, descriptions)):
+        if len(c) == 1:  # Ignore A, B, C... group title, as already included before
             continue
         mentioned_group = detect_mentioned_context(d)
-        result = result.append(
-            {'context': clean_context(c), 'description': clean_descriptions(d), 'mentioned_groups': mentioned_group},
-            ignore_index=True)
+        if len(c) <= 3:
+            result = result.append({'context': clean_context(c), 'description': clean_descriptions(d), 'mentioned_groups': mentioned_group},
+                                    ignore_index=True)
+        else:
+            result = result.append({'context': clean_context(c), 'description': "", 'mentioned_groups': mentioned_group},
+                                    ignore_index=True)
 
-result = result.groupby('context').agg({'description': '; '.join, 'mentioned_groups': lambda x: set.union(*x)})
+result = result.groupby('context').agg({'description': ''.join, 'mentioned_groups': lambda x: set.union(*x)})
+
+# Clean up the mention_groups column
+result["mentioned_groups"] = result["mentioned_groups"].apply(lambda x: x if x != set() else "").apply(lambda s: re.sub(r"[{}']", "", str(s))).apply(lambda c: re.sub(r"[,]", ";", c))
+
 result.to_csv('result.csv')
 
-# clean up
+# Clean up
 driver.close()
 print('done')
