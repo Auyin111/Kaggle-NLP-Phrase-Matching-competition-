@@ -62,11 +62,8 @@ class CustomModel_Original(nn.Module):
 # ====================================================
 
 class Dropout_Linear(nn.Module):
-    def __init__(self, in_size, out_size, cfg, config_path=None, prob=None):
-        if config_path is None:
-            self.config = AutoConfig.from_pretrained(cfg.pretrained_model, output_hidden_states=True)
-        else:
-            self.config = torch.load(config_path)
+    def __init__(self, in_size, out_size, cfg, config, prob=None):
+        self.config = config
         super().__init__()
         self.cfg = cfg
         if prob == None:
@@ -101,16 +98,13 @@ class Dropout_Linear(nn.Module):
 # ====================================================
 
 class MHSA(nn.Module):
-    def __init__(self, embedding_dim, cfg, config_path=None):
-        if config_path is None:
-            self.config = AutoConfig.from_pretrained(cfg.pretrained_model, output_hidden_states=True)
-        else:
-            self.config = torch.load(config_path)
+    def __init__(self, embedding_dim, cfg, config):
         super().__init__()
+        self.config = config
         self.cfg = cfg
-        self.Q_list = nn.ModuleList([Dropout_Linear(embedding_dim, embedding_dim, self.cfg, prob=self.cfg.self_attention_dropout_prob) for _ in range(self.cfg.self_attention_head_num)])
-        self.K_list = nn.ModuleList([Dropout_Linear(embedding_dim, embedding_dim, self.cfg, prob=self.cfg.self_attention_dropout_prob) for _ in range(self.cfg.self_attention_head_num)])
-        self.V_list = nn.ModuleList([Dropout_Linear(embedding_dim, embedding_dim, self.cfg, prob=self.cfg.self_attention_dropout_prob) for _ in range(self.cfg.self_attention_head_num)])
+        self.Q_list = nn.ModuleList([Dropout_Linear(embedding_dim, embedding_dim, self.cfg, self.config, prob=self.cfg.self_attention_dropout_prob) for _ in range(self.cfg.self_attention_head_num)])
+        self.K_list = nn.ModuleList([Dropout_Linear(embedding_dim, embedding_dim, self.cfg, self.config, prob=self.cfg.self_attention_dropout_prob) for _ in range(self.cfg.self_attention_head_num)])
+        self.V_list = nn.ModuleList([Dropout_Linear(embedding_dim, embedding_dim, self.cfg, self.config, prob=self.cfg.self_attention_dropout_prob) for _ in range(self.cfg.self_attention_head_num)])
 
         self.W = nn.Linear(self.cfg.self_attention_head_num, 1)
         self.W.weight.data.normal_(mean=0.0, std=self.config.initializer_range)
@@ -122,7 +116,6 @@ class MHSA(nn.Module):
         self.mixing_residual = nn.Linear(2, 1)
         self.mixing_residual.weight.data.normal_(mean=0.0, std=self.config.initializer_range)
         self.mixing_residual.bias.data.zero_()
-
 
     def _init_linear_weights(self, module_list):
         for linear in module_list:
@@ -171,10 +164,12 @@ class CustomModel(nn.Module):
         self.mixing_layers = nn.Linear(self.config.num_hidden_layers + 1, 1)
         self._init_weights(self.mixing_layers)
 
-        self.MHSA = MHSA(self.config.hidden_size, self.cfg)
-        self.final_forward = nn.Sequential(Dropout_Linear(self.config.hidden_size, 512, self.cfg),
+        self.MHSA = MHSA(self.config.hidden_size, self.cfg, self.config)
+        self.final_forward = nn.Sequential(Dropout_Linear(self.config.hidden_size, 512, self.cfg, self.config),
                                            nn.Tanh(),
-                                           Dropout_Linear(512, 1, self.cfg))
+                                           Dropout_Linear(512, self.cfg.target_size, self.cfg, self.config))
+
+        self.sigmoid = nn.Sigmoid()
 
     def _init_weights(self, module):
         if isinstance(module, nn.Linear):
@@ -190,9 +185,12 @@ class CustomModel(nn.Module):
             module.weight.data.fill_(1.0)
 
     def mixing_hidden_layers(self, inputs):
-        if self.cfg.pretrained_model == "albert-base-v2":
+        model_list1 = ["albert-base-v2", "xlm-roberta-base"]  # Models with dim(output) == 4
+        model_list2 = ["microsoft/deberta-v3-base", "microsoft/mdeberta-v3-base"]  # Models with dim(output) == 3
+        #print(self.model(**inputs))
+        if self.cfg.pretrained_model in model_list1:
             all_layers = [layer for layer in self.model(**inputs)[2]]
-        elif self.cfg.pretrained_model == "microsoft/deberta-v3-base":
+        elif self.cfg.pretrained_model in model_list2:
             all_layers = [layer for layer in self.model(**inputs)[1]]
         else:
             raise Exception("New model is being used, please confirm the model output length in 'mixing_hidden_layers'.")
@@ -204,55 +202,7 @@ class CustomModel(nn.Module):
         mixed_layer_embeddings = self.mixing_hidden_layers(inputs)
         final_feature = self.MHSA(mixed_layer_embeddings)
         output = self.final_forward(final_feature)
+        if self.cfg.loss_fn == "MSE" or self.cfg.loss_fn == "CCC1" or self.cfg.loss_fn == "CCC2" or self.cfg.loss_fn == "PCC":
+            return self.sigmoid(output)
         return output
 
-
-# ====================================================
-# Model with MSD + Mixed Hidden Layers + MH_self_Attention (Categorical Label, not yet tested)
-# ====================================================
-
-class CustomModel_Logistic(nn.Module):
-    def __init__(self, cfg, config_path=None, pretrained=False):
-        super().__init__()
-        self.cfg = cfg
-        if config_path is None:
-            self.config = AutoConfig.from_pretrained(cfg.pretrained_model, output_hidden_states=True)
-        else:
-            self.config = torch.load(config_path)
-        if pretrained:
-            self.model = AutoModel.from_pretrained(cfg.pretrained_model, config=self.config)
-        else:
-            self.model = AutoModel.from_config(self.config)
-
-        self.mixing_layers = nn.Linear(self.config.num_hidden_layers + 1, 1)
-        self._init_weights(self.mixing_layers)
-
-        self.MHSA = MHSA(self.config.hidden_size, self.cfg)
-        self.final_forward = nn.Sequential(Dropout_Linear(self.config.hidden_size, 512, self.cfg),
-                                           nn.Tanh(),
-                                           Dropout_Linear(512, 5, self.cfg))
-
-    def _init_weights(self, module):
-        if isinstance(module, nn.Linear):
-            module.weight.data.normal_(mean=0.0, std=self.config.initializer_range)
-            if module.bias is not None:
-                module.bias.data.zero_()
-        elif isinstance(module, nn.Embedding):
-            module.weight.data.normal_(mean=0.0, std=self.config.initializer_range)
-            if module.padding_idx is not None:
-                module.weight.data[module.padding_idx].zero_()
-        elif isinstance(module, nn.LayerNorm):
-            module.bias.data.zero_()
-            module.weight.data.fill_(1.0)
-
-    def mixing_hidden_layers(self, inputs):
-        all_layers = [layer for layer in self.model(**inputs)[2]]
-        all_layers = torch.stack(all_layers, dim=-1)
-        mixed_layer_embeddings = torch.squeeze(self.mixing_layers(all_layers), dim=-1)
-        return mixed_layer_embeddings
-
-    def forward(self, inputs):
-        mixed_layer_embeddings = self.mixing_hidden_layers(inputs)
-        final_feature = self.MHSA(mixed_layer_embeddings)
-        output = torch.argmax(self.final_forward(final_feature), dim=-1)
-        return output

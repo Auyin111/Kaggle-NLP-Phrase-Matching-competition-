@@ -26,11 +26,11 @@ class Cfg:
 
         self.is_debug = is_debug
         if self.is_debug:
-            self.epochs = 2
+            self.epochs = 1
             self.n_fold = 2
             self.trn_fold = [0, 1]
         else:
-            self.epochs = 5
+            self.epochs = 10
             # CV
             self.n_fold = 4
             self.trn_fold = [0, 1, 2, 3]
@@ -40,16 +40,19 @@ class Cfg:
             self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         print(f'Using device: {self.device}')
 
-    # determine whether to use grp 2 context
+    # determine whether to use the following features in the training set
     use_grp_2 = True
+    use_mentioned_groups = False
+    use_translated_data = False
 
     # dir and path
     dir_own_dataset = 'own_dataset'
 
     # wandb
-    user = 'rlin'
+    user = 'tmkwong'
     notes = 'example'
-    _wandb_kernel = 'nakama'
+    _wandb_kernel = 'baseline1'
+    competition = 'PPPM'
 
     train = True
     seed = 42
@@ -60,19 +63,20 @@ class Cfg:
 
     # training
     batch_scheduler = True
-    plot_lr = True  # (New)
+    plot_lr = False  # (New)
 
     # Batch loader (New)
-    batch_size = 16
+    batch_size = 32
     num_workers = 4
     dynamic_padding = True
     batch_distribution = 'context'  # ['label', 'context', None]
 
     # Model
-    pretrained_model = "albert-base-v2"  # "microsoft/deberta-v3-base", "albert-base-v2"
-    target_size = 1  # Only in original model
+    pretrained_model = "albert-base-v2"  # ["microsoft/deberta-v3-base", "albert-base-v2", "microsoft/mdeberta-v3-base", "xlm-roberta-base"]
+    target_size = 1  # 1 = regression, 5 = classification
 
     # Optimizer
+    loss_fn = "MSE"  # ["MSE", "BCE", "BCEWithLogits", "CCC1", "CCC2", "PCC", "CE"]
     scheduler='cosine'  # ['linear', 'cosine', 'cosine_annealing']
     num_cycles = 0.5  # For 'linear' or 'cosine' only
     num_warmup_steps = 1000  # For 'linear' or 'cosine' only

@@ -3,6 +3,6 @@ testing_2.py
 submission.csv
 *testing.ipynb
 requirements.txt
-output/v*
+output
 wandb
 .ipynb_checkpoints
