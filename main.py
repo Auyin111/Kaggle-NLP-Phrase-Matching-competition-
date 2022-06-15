@@ -195,9 +195,7 @@ if __name__ == '__main__':
         version_protection = False
 
     train_model(version, False, is_debug=is_debug, version_protection=version_protection)
-    #predict_result(version, is_debug=is_debug,
-                   # device='cpu'
-                   # )
+    predict_result(version, is_debug=is_debug, device='cuda')
 
     df = pd.read_csv(os.path.join('output', version, 'df_valid.csv'))
     # df.to_csv('output/v3.1.1/df_valid.csv')d
