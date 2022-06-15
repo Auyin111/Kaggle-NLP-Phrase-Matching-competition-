@@ -28,7 +28,7 @@ pd.set_option('display.width', 1000)
 # %env TOKENIZERS_PARALLELISM=true
 
 
-def train_model(version, with_wandb, is_debug=False, device=None):
+def train_model(version, with_wandb, is_debug=False, device=None, version_protection=True):
 
     # setting
     ####################################################
@@ -50,16 +50,25 @@ def train_model(version, with_wandb, is_debug=False, device=None):
 
     # start
     ####################################################
-    if not os.path.exists(cfg.dir_output):
-        os.makedirs(cfg.dir_output)
+
+    if version_protection == True:  # Allow disabling version protection for testing
+        if not os.path.exists(cfg.dir_output):
+          os.makedirs(cfg.dir_output)
+        else:
+            raise Exception(f'the version: {cfg.version} is used, please edit version before train model')
     else:
-        raise Exception(f'the version: {cfg.version} is used, please edit version before train model')
+        protection_message = highlight_string("Version protection is off, make sure to turn it on for training submission models")
+        cfg.logger.info(protection_message)
+
+    if (cfg.swa_start > cfg.epochs) and cfg.use_swa:  # Check if swa starts before the last epoch ends.
+        raise Exception("SWA is enabled but SWA starts after the last epoch.")
 
     df_train = pd.read_csv(os.path.join(cfg.dir_data, 'train.csv'))
     # TODO
     if cfg.is_debug:
         df_train = df_train.head(200)
 
+    pd.options.display.max_colwidth = 100
     df_train = merge_context(df_train, cfg)
     df_train = create_text(df_train, cfg.use_grp_2)
 
@@ -155,9 +164,11 @@ def predict_result(version, is_debug, device=None):
 
 if __name__ == '__main__':
 
-    version = 'v3.3.0.11'
-    is_debug = True
-    train_model(version, True, is_debug=is_debug)
+    version = 'albert-base-v2'
+    version_protection = False
+    is_debug = False
+
+    train_model(version, False, is_debug=is_debug, version_protection= version_protection)
     predict_result(version, is_debug=is_debug,
                    # device='cpu'
                    )

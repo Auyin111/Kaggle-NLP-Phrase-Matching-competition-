@@ -62,24 +62,51 @@ class Cfg:
 
     # training
     num_workers = 4
-    scheduler = 'cosine'  # ['linear', 'cosine']
     batch_scheduler = True
-    num_cycles = 0.5
-    num_warmup_steps = 0
+    plot_lr = True  # (New)
+
+    # Batch loader (New)
+    dynamic_padding = True
+    batch_distribution = 'context'  # ['label', 'context', None]
 
     # Model
-    # pretrained_model = "microsoft/deberta-v3-large"
-    pretrained_model = "microsoft/deberta-v3-base"
-    encoder_lr = 2e-5
-    decoder_lr = 2e-5
-    min_lr = 1e-6
+    pretrained_model = "albert-base-v2"  # "microsoft/deberta-v3-base", "albert-base-v2"
+    target_size = 1  # Only in original model
+
+    # Optimizer
+    scheduler = 'cosine'  # ['linear', 'cosine', 'cosine_annealing']
+    num_cycles = 0.5  # For 'linear' or 'cosine' only
+    num_warmup_steps = 1000  # For 'linear' or 'cosine' only
+    encoder_lr = 3e-5
+    decoder_lr = 3e-5
+    min_lr = 3e-6
     eps = 1e-6
     betas = (0.9, 0.999)
-    fc_dropout = 0.2
-    target_size = 1
     weight_decay = 0.01
     gradient_accumulation_steps = 1
     max_grad_norm = 1000
 
+    # Stochastic weight average (New)
+    use_swa = False
+    early_stopping = True
+    swa_start = 8  # swa starts at this epoch
+    swa_lr = 1e-5
+    anneal_steps = 800
+
+    # Multi sample dropout (New)
+    dropout_prop = 0.2
+    dropout_sample_num = 4  # Number of multi sample dropout, 1 = no MSD
+    msd_average = False  # Use average output instead of sum output in multi sample dropout
+
+    # Self-Attention (New)
+    self_attention_head_num = 1
+    self_attention_dropout_prob = 0.1
+
     # logger
     logger = get_logger(os.path.join('output', 'train.log'))
+
+
+if __name__ == '__main__':
+
+    cfg = Cfg()
+    print(cfg.version)

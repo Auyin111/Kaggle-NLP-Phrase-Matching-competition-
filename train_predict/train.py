@@ -1,34 +1,39 @@
 import wandb
 import numpy as np
+import pandas as pd
 import gc
 import torch
 import torch.nn as nn
 import time
 import os
+from multiprocessing import Process  # For displaying learning rate plot without blocking
+
+from gen_data.dataset import TrainDataset
+from model.model import CustomModel, CustomModel_Original
 
 from torch.utils.data import DataLoader
-from gen_data.dataset import TrainDataset
-from model.model import CustomModel
-from torch.optim import AdamW
-from transformers import get_linear_schedule_with_warmup, get_cosine_schedule_with_warmup
-from utils import get_score
+from torch.optim import Adam, SGD, AdamW
+from torch.optim.swa_utils import AveragedModel, SWALR  ## New ##
+from torch.optim.lr_scheduler import CosineAnnealingLR  ## New ##
+
+from transformers import get_linear_schedule_with_warmup, get_cosine_schedule_with_warmup, DataCollatorWithPadding
+from utils import get_score, get_distribution, plot_lr_fn
 from utils import AverageMeter, timeSince
 from tqdm import tqdm
 
 
-def train_fn(fold, train_loader, model, criterion, optimizer, epoch, scheduler,
-             device, cfg):
-
+def train_fn(fold, train_loader, model, swa_model, criterion, optimizer, epoch, scheduler, swa_scheduler, device, cfg):  # Modified to support dynamic padding, batch sampler, swa
     model.train()
     scaler = torch.cuda.amp.GradScaler(enabled=cfg.apex)
     losses = AverageMeter()
     start = end = time.time()
     global_step = 0
+    lrs = []
 
-    for step, (inputs, labels) in tqdm(enumerate(train_loader)):
-        for k, v in inputs.items():
-            inputs[k] = v.to(device)
-        labels = labels.to(device)
+    for step, inputs in enumerate(train_loader):
+        inputs = {k: v.to(device) for k, v in inputs.items()}
+        labels = inputs["labels"]
+        inputs.pop("labels")
         batch_size = labels.size(0)
         with torch.cuda.amp.autocast(enabled=cfg.apex):
             y_preds = model(inputs)
@@ -43,51 +48,76 @@ def train_fn(fold, train_loader, model, criterion, optimizer, epoch, scheduler,
             scaler.update()
             optimizer.zero_grad()
             global_step += 1
+
+            ### New ###
+
             if cfg.batch_scheduler:
-                scheduler.step()
+                if epoch + 1 >= cfg.swa_start and cfg.use_swa:
+                    if swa_model == None:
+                        swa_model = AveragedModel(model)
+                    else:
+                        swa_model.update_parameters(model)
+                        swa_scheduler.step()
+
+                else:
+                    scheduler.step()
+
+                #if cfg.use_swa and epoch + 1 == cfg.epochs and step == len(train_loader) - 1:
+                #    torch.optim.swa_utils.update_bn(train_loader, swa_model)
+                #    print("Batch norm for swa updated")
+
+            ### New ###
+
         end = time.time()
-        if step % cfg.print_freq == 0 or step == (len(train_loader)-1):
+
+        if step % cfg.print_freq == 0 or step == (len(train_loader) - 1):
             print('Epoch: [{0}][{1}/{2}] '
                   'Elapsed {remain:s} '
                   'Loss: {loss.val:.4f}({loss.avg:.4f}) '
                   'Grad: {grad_norm:.4f}  '
                   'LR: {lr:.8f}  '
-                  .format(epoch+1, step, len(train_loader), 
-                          remain=timeSince(start, float(step+1)/len(train_loader)),
+                  .format(epoch + 1, step, len(train_loader),
+                          remain=timeSince(start, float(step + 1) / len(train_loader)),
                           loss=losses,
                           grad_norm=grad_norm,
                           lr=scheduler.get_lr()[0]))
+
+        if cfg.plot_lr:
+            lrs.append(optimizer.param_groups[0]["lr"])
+
         if cfg.with_wandb:
             wandb.log({f"[fold{fold}] loss": losses.val,
                        f"[fold{fold}] lr": scheduler.get_lr()[0]})
-    return losses.avg
+    return losses.avg, lrs
 
 
-def valid_fn(valid_loader, model, criterion, device, cfg):
-    losses = AverageMeter()
+def valid_fn(valid_loader, model, swa_model, criterion, epoch, device, cfg):  # Modified to support swa
     model.eval()
     preds = []
     start = end = time.time()
-    for step, (inputs, labels) in enumerate(valid_loader):
-        for k, v in inputs.items():
-            inputs[k] = v.to(device)
-        labels = labels.to(device)
+    for step, inputs in enumerate(valid_loader):
+        inputs = {k: v.to(device) for k, v in inputs.items()}
+        labels = inputs["labels"]
+        inputs.pop("labels")
         batch_size = labels.size(0)
         with torch.no_grad():
-            y_preds = model(inputs)
+            if epoch + 1 >= cfg.swa_start and cfg.use_swa and swa_model != None:
+                y_preds = swa_model(inputs)
+            else:
+                y_preds = model(inputs)
         loss = criterion(y_preds.view(-1, 1), labels.view(-1, 1))
         if cfg.gradient_accumulation_steps > 1:
             loss = loss / cfg.gradient_accumulation_steps
         losses.update(loss.item(), batch_size)
         preds.append(y_preds.sigmoid().to('cpu').numpy())
         end = time.time()
-        if step % cfg.print_freq == 0 or step == (len(valid_loader)-1):
+        if step % cfg.print_freq == 0 or step == (len(valid_loader) - 1):
             print('EVAL: [{0}/{1}] '
                   'Elapsed {remain:s} '
                   'Loss: {loss.val:.4f}({loss.avg:.4f}) '
                   .format(step, len(valid_loader),
                           loss=losses,
-                          remain=timeSince(start, float(step+1)/len(valid_loader))))
+                          remain=timeSince(start, float(step + 1) / len(valid_loader))))
     predictions = np.concatenate(preds)
     predictions = np.concatenate(predictions)
     return losses.avg, predictions
@@ -100,8 +130,9 @@ def train_loop(folds, fold,
     cfg.logger.info(f"========== fold: {fold} training ==========")
 
     # ====================================================
-    # loader
+    # loader (Modified to support dynamic padding, batch sampler, swa
     # ====================================================
+
     train_folds = folds[folds['fold'] != fold].reset_index(drop=True)
     valid_folds = folds[folds['fold'] == fold].reset_index(drop=True)
     valid_labels = valid_folds['score'].values
@@ -109,14 +140,31 @@ def train_loop(folds, fold,
     train_dataset = TrainDataset(cfg, train_folds)
     valid_dataset = TrainDataset(cfg, valid_folds)
 
+    collator = DataCollatorWithPadding(cfg.tokenizer) if cfg.dynamic_padding else None
+
+    if cfg.batch_distribution == "label" or cfg.batch_distribution == "context":
+        distribution, weights = get_distribution(train_folds, cfg)
+        sampler = torch.utils.data.WeightedRandomSampler(weights, len(weights), replacement=False) #generator=cfg.generator)
+    else:
+        sampler = None
+
+    cfg.logger.info(f"Batch sampler: {cfg.batch_distribution}")
+    if cfg.batch_distribution == "label" or cfg.batch_distribution == "context":
+        cfg.logger.info(f"Distribution: {distribution}")
+
     train_loader = DataLoader(train_dataset,
                               batch_size=cfg.batch_size,
-                              shuffle=True,
-                              num_workers=cfg.num_workers, pin_memory=True, drop_last=True)
+                              shuffle=False,
+                              sampler=sampler,
+                              num_workers=cfg.num_workers,
+                              collate_fn=collator,
+                              pin_memory=True, drop_last=True)
     valid_loader = DataLoader(valid_dataset,
                               batch_size=cfg.batch_size,
                               shuffle=False,
-                              num_workers=cfg.num_workers, pin_memory=True, drop_last=False)
+                              num_workers=cfg.num_workers,
+                              collate_fn=collator,
+                              pin_memory=True, drop_last=False)
 
     # ====================================================
     # model & optimizer
@@ -146,8 +194,9 @@ def train_loop(folds, fold,
     optimizer = AdamW(optimizer_parameters, lr=cfg.encoder_lr, eps=cfg.eps, betas=cfg.betas)
 
     # ====================================================
-    # scheduler
+    # scheduler (includes CosineAnnealingLR)
     # ====================================================
+
     def get_scheduler(cfg, optimizer, num_train_steps):
         if cfg.scheduler == 'linear':
             scheduler = get_linear_schedule_with_warmup(
@@ -155,13 +204,22 @@ def train_loop(folds, fold,
             )
         elif cfg.scheduler == 'cosine':
             scheduler = get_cosine_schedule_with_warmup(
-                optimizer, num_warmup_steps=cfg.num_warmup_steps, num_training_steps=num_train_steps,
-                num_cycles=cfg.num_cycles
+                optimizer, num_warmup_steps=cfg.num_warmup_steps, num_training_steps=num_train_steps, num_cycles=cfg.num_cycles
             )
+        elif cfg.scheduler == "cosine_annealing":  ### New ###
+            scheduler = CosineAnnealingLR(optimizer, T_max=num_train_steps)
         return scheduler
+
 
     num_train_steps = int(len(train_folds) / cfg.batch_size * cfg.epochs)
     scheduler = get_scheduler(cfg, optimizer, num_train_steps)
+
+    # ====================================================
+    # swa initialization (new)
+    # ====================================================
+
+    swa_model = None
+    swa_scheduler = SWALR(optimizer, anneal_epochs=cfg.anneal_steps, swa_lr=cfg.swa_lr) if cfg.use_swa else None
 
     # ====================================================
     # loop
@@ -169,8 +227,9 @@ def train_loop(folds, fold,
     criterion = nn.BCEWithLogitsLoss(reduction="mean")
 
     best_score = 0.
+    lrs_list = []  # For plotting learning rates
 
-    dir_model = os.path.join(cfg.dir_output, 'model',)
+    dir_model = os.path.join(cfg.dir_output, 'model', )
     if not os.path.exists(dir_model):
         os.makedirs(dir_model)
     path_model = os.path.join(dir_model, f"fold_{fold}_best.model")
@@ -180,13 +239,14 @@ def train_loop(folds, fold,
         start_time = time.time()
 
         # train_predict
-        avg_loss = train_fn(fold, train_loader, model, criterion, optimizer, epoch, scheduler, cfg.device, cfg)
+        avg_loss, lrs = train_fn(fold, train_loader, model, swa_model, criterion, optimizer, epoch, scheduler, swa_scheduler, cfg.device, cfg)
 
         # eval
-        avg_val_loss, predictions = valid_fn(valid_loader, model, criterion, cfg.device, cfg)
+        avg_val_loss, predictions = valid_fn(valid_loader, model, swa_model, criterion, epoch, cfg.device, cfg)
 
         # scoring
         score = get_score(valid_labels, predictions)
+        lrs_list += lrs
 
         elapsed = time.time() - start_time
 
@@ -198,10 +258,12 @@ def train_loop(folds, fold,
                        f"[fold{fold}] avg_train_loss": avg_loss,
                        f"[fold{fold}] avg_val_loss": avg_val_loss,
                        f"[fold{fold}] score": score})
-        if (best_score < score) or (epoch == 0):
-            best_score = score
-            cfg.logger.info(f'Epoch {epoch + 1} - Save Best Score: {best_score:.4f} Model')
-            torch.save({'model': model.state_dict(),
+
+        if cfg.early_stopping:
+            if (best_score < score) or (epoch == 0):
+                best_score = score
+                cfg.logger.info(f'Epoch {epoch + 1} - Save Best Score: {best_score:.4f} Model')
+                torch.save({'model': model.state_dict(),
                         'predictions': predictions},
                        path_model)
 
@@ -211,3 +273,5 @@ def train_loop(folds, fold,
     gc.collect()
 
     return valid_folds
+
+
