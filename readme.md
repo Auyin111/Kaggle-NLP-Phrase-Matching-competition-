@@ -95,6 +95,6 @@ ___________________________________________________
   
     d. Saving the cfg.py and model.py used by the current version to the output directory right before training
   
-  6. add early stopping patience
+  6. Add early stopping patience
   
 </details>
