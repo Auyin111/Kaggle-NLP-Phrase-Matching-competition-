@@ -4,6 +4,7 @@ import os, random, time, math
 import torch
 import stat
 import shutil
+import matplotlib.pyplot as plt
 
 
 def cp_child_content(dir_source, dir_destination, list_cp_content):
@@ -85,7 +86,10 @@ def get_score(y_true, y_pred):
 
 
 def get_result(oof_df, cfg):
-    labels = oof_df['score'].values
+    labels = oof_df['score']
+    if cfg.target_size == 5:
+        labels = labels.apply(lambda x: torch.argmax(x).item())
+
     preds = oof_df['pred'].values
     score = get_score(labels, preds)
     cfg.logger.info(f'Score: {score:<.4f}')
@@ -122,7 +126,6 @@ def timeSince(since, percent):
     rs = es - s
     return '%s (remain %s)' % (asMinutes(s), asMinutes(rs))
 
-
 def highlight_string(string, symbol='-'):
     str_len = len(string)
 
@@ -131,3 +134,25 @@ def highlight_string(string, symbol='-'):
     str_output = f"""\n\n{str_top_bottom}\n{str_middle}\n{str_top_bottom}\n"""
 
     return str_output
+
+# ====================================================
+# Print out the distribution of labels/contexts in each fold
+# ====================================================
+
+def get_distribution(folds, cfg):
+    if cfg.batch_distribution == "label" or cfg.batch_distribution == "context":
+
+        if cfg.batch_distribution == "label":
+            distribution = {s / 4: len(folds[folds["score"] == s / 4]) / len(folds) for s in range(5)}
+            folds["distribution"] = folds["score"].map(distribution)
+
+        elif cfg.batch_distribution == "context":
+            distribution = folds["context"].apply(lambda x: x[0]).value_counts().apply(lambda x: x / len(folds)).to_dict()
+            folds["distribution"] = folds["context"].apply(lambda x: x[0]).map(distribution)
+        return distribution, folds["distribution"].tolist()
+
+    return None
+
+def plot_lr_fn(lrs_input):
+    plt.plot(lrs_input)
+    plt.show()

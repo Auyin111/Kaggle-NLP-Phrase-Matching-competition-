@@ -1,10 +1,10 @@
 context_grp_1,text_grp_1
-A,HUMAN NECESSITIES
-B,PERFORMING OPERATIONS; TRANSPORTING
-C,CHEMISTRY; METALLURGY
-D,TEXTILES; PAPER
-E,FIXED CONSTRUCTIONS
-F,MECHANICAL ENGINEERING; LIGHTING; HEATING; WEAPONS; BLASTING
-G,PHYSICS
-H,ELECTRICITY
-Y,GENERAL TAGGING OF NEW TECHNOLOGICAL DEVELOPMENTS; GENERAL TAGGING OF CROSS-SECTIONAL TECHNOLOGIES SPANNING OVER SEVERAL SECTIONS OF THE IPC; TECHNICAL SUBJECTS COVERED BY FORMER USPC CROSS-REFERENCE ART COLLECTIONS [XRACs] AND DIGESTS
+A,human necessities
+B,performing operations; transporting
+C,chemistry; metallurgy
+D,textiles; paper
+E,fixed constructions
+F,mechanical engineering; lighting; heating; weapons; blasting
+G,physics
+H,electricity
+Y,general tagging of new technological developments; general tagging of cross-sectional technologies spanning over several sections of the ipc; technical subjects covered by former uspc cross-reference art collections [xracs] and digests
