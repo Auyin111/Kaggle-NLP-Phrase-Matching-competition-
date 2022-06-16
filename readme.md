@@ -94,4 +94,7 @@ ___________________________________________________
     c. Option for disabling model checking (Auto-disable when is_debug == True)
   
     d. Saving the cfg.py and model.py used by the current version to the output directory right before training
+  
+  6. add early stopping patience
+  
 </details>
