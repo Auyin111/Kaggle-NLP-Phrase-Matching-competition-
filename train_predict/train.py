@@ -7,6 +7,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import time
 import os
+from utils import highlight_string
 from multiprocessing import Process  # For displaying learning rate plot without blocking
 
 from gen_data.dataset import TrainDataset
@@ -258,7 +259,7 @@ def train_loop(folds, fold,
     else:
         raise Exception("Unknown loss function, please check your spelling.")
 
-    best_score = 0.
+    best_score = - 100
     lrs_list = []  # For plotting learning rates
 
     dir_model = os.path.join(cfg.dir_output, 'model', )
@@ -266,6 +267,7 @@ def train_loop(folds, fold,
         os.makedirs(dir_model)
     path_model = os.path.join(dir_model, f"fold_{fold}_best.model")
 
+    es_patience_count = 0
     for epoch in range(cfg.epochs):
 
         start_time = time.time()
@@ -305,11 +307,27 @@ def train_loop(folds, fold,
         else:
             if cfg.early_stopping:
                 if (best_score < score) or (epoch == 0):
+
+                    cfg.logger.info(highlight_string(
+                        f'in epoch {epoch}, the validation score was changed from {best_score} to {score}'))
+
                     best_score = score
                     cfg.logger.info(f'Epoch {epoch + 1} - Save Best Score: {best_score:.4f} Model')
                     torch.save({'model': model.state_dict(),
                                 'predictions': predictions},
                                path_model)
+
+                else:
+                    es_patience_count += 1
+                    cfg.logger.info(highlight_string(f'in epoch {epoch}, no any improvement '
+                                    f'(es_patience_count: {es_patience_count}/{cfg.es_patience})'))
+
+                    if es_patience_count == cfg.es_patience:
+                        cfg.logger.info(highlight_string(
+                            'the training process is stopped by early stopping setup', '!'))
+                        print()
+                        break
+
             else:
                 torch.save({'model': model.state_dict(),
                             'predictions': predictions},

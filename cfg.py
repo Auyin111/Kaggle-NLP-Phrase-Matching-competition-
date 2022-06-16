@@ -89,9 +89,12 @@ class Cfg:
     gradient_accumulation_steps = 1
     max_grad_norm = 1000
 
+    # early stopping
+    early_stopping = True
+    es_patience = 5
+
     # Stochastic weight average (New)
     use_swa = False
-    early_stopping = True
     swa_start = 8  # swa starts at this epoch
     swa_lr = 1e-5
     anneal_steps = 800
