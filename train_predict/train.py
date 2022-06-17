@@ -309,13 +309,15 @@ def train_loop(folds, fold,
                 if (best_score < score) or (epoch == 0):
 
                     cfg.logger.info(highlight_string(
-                        f'in epoch {epoch}, the validation score was changed from {best_score} to {score}'))
+                        f'in epoch {epoch}, the validation score was improved from {best_score} to {score}'))
 
                     best_score = score
                     cfg.logger.info(f'Epoch {epoch + 1} - Save Best Score: {best_score:.4f} Model')
                     torch.save({'model': model.state_dict(),
                                 'predictions': predictions},
                                path_model)
+                    # reset es_patience_count
+                    es_patience_count = 0
 
                 else:
                     es_patience_count += 1
