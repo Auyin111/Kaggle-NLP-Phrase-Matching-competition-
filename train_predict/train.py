@@ -316,6 +316,8 @@ def train_loop(folds, fold,
                     torch.save({'model': model.state_dict(),
                                 'predictions': predictions},
                                path_model)
+                    # reset es_patience_count
+                    es_patience_count = 0
 
                 else:
                     es_patience_count += 1
