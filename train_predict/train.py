@@ -309,7 +309,7 @@ def train_loop(folds, fold,
                 if (best_score < score) or (epoch == 0):
 
                     cfg.logger.info(highlight_string(
-                        f'in epoch {epoch}, the validation score was changed from {best_score} to {score}'))
+                        f'in epoch {epoch}, the validation score was improved from {best_score} to {score}'))
 
                     best_score = score
                     cfg.logger.info(f'Epoch {epoch + 1} - Save Best Score: {best_score:.4f} Model')
