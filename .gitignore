@@ -6,6 +6,7 @@ output
 output/deb*
 wandb
 .ipynb_checkpoints
+.idea
 
 # testing code
 test*
