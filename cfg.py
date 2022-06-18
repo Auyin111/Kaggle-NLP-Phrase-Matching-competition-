@@ -56,7 +56,6 @@ class Cfg:
 
     train = True
     seed = 42
-    competition = 'PPPM'
     debug = False
     apex = True
     print_freq = 100
