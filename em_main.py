@@ -1,8 +1,9 @@
 from ensemble.ensemble_model import EnsembleModel
-import category_encoders as ce
 import os
+import joblib
 import pandas as pd
 import torch
+import json
 import gc
 import datetime
 import importlib
@@ -14,9 +15,28 @@ from transformers import AutoTokenizer, DataCollatorWithPadding
 from gen_data.dataset import create_text, merge_context
 
 
+# TODO: improve
+def prepare_test_set(version, is_debug, device=None):
+    """use fake version to find test set first"""
+
+    # load specific version Cfg
+    str_cfg_module = "output." + version + '.' + 'cfg'
+    cfg_module = importlib.import_module(str_cfg_module)
+    Cfg = cfg_module.Cfg
+
+    cfg = Cfg(version, is_debug=is_debug, with_wandb=False, device=device)
+
+    df_test = pd.read_csv(os.path.join(cfg.dir_data, 'test.csv'))
+
+    df_test = merge_context(df_test, cfg)
+    df_test = create_text(df_test, cfg.use_grp_2)
+
+    return df_test
+
+
 # TODO: combine with the predict_result in main.py
-def predict_result(version, is_debug, device=None):
-    # load the specific version cfg, model, AutoTokenizer, model parameter
+def predict_result(version, df_test, is_debug, device=None):
+    """load the specific version cfg, model, AutoTokenizer, model parameter and make prediction"""
 
     # load specific version model
     str_model_module = "output." + version + '.' + 'model'
@@ -33,11 +53,6 @@ def predict_result(version, is_debug, device=None):
     current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     message_status = highlight_string(f'predict by {cfg.version} model at {current_time}')
     cfg.logger.info(message_status)
-
-    df_test = pd.read_csv(os.path.join(cfg.dir_data, 'test.csv'))
-
-    df_test = merge_context(df_test, cfg)
-    df_test = create_text(df_test, cfg.use_grp_2)
 
     # load specific version tokenizer
     print(os.path.join(cfg.dir_output, 'tokenizer'))
@@ -58,7 +73,7 @@ def predict_result(version, is_debug, device=None):
                              collate_fn=collator,
                              pin_memory=True, drop_last=False)
 
-    predictions = []
+    df_pred = pd.DataFrame()
     for fold in cfg.trn_fold:
         model = CustomModel(cfg,
                             config_path=os.path.join(cfg.dir_output, 'model.config'),
@@ -69,26 +84,56 @@ def predict_result(version, is_debug, device=None):
         model.load_state_dict(state['model'])
 
         prediction = inference_fn(test_loader, model, cfg.device)
-        predictions.append(prediction)
+
+        df_pred.loc[:, f'{version}_fold_{fold}'] = [x[0] for x in prediction]
+
         del model, state, prediction;
         gc.collect()
         torch.cuda.empty_cache()
 
-        print(predictions)
+    return df_pred
+
+
+def em_predict_result(em_trainer, df_test, list_model_version, list_fold, is_debug):
+
+    df_all_pred = pd.DataFrame()
+    for version in list_model_version:
+        df_pred = predict_result(version, df_test, is_debug, device=None)
+        df_all_pred = pd.concat([df_all_pred, df_pred], axis=1)
+
+    str_best_model = json.load(open(os.path.join(em_trainer.em_cfg.dir_em_output, 'dict_best_model.json')))['best_model']
+
+    df_fold_prediction = pd.DataFrame()
+    for fold in list_fold:
+        print(f'fold: {fold}')
+        list_features = [col for col in df_all_pred if f'_fold_{fold}' in col]
+        path_em_model = os.path.join(em_trainer.em_cfg.dir_em_output, str_best_model, f'fold_{fold}', 'model.joblib')
+        em_model = joblib.load(path_em_model)
+
+        df_fold_prediction.loc[:, fold] = em_model.predict(df_all_pred[list_features])
+
+    df_test.loc[:, 'score'] = df_fold_prediction.mean(axis=1)
+    df_test[['id', 'score']].to_csv('submission.csv', index=False)
 
 
 if __name__ == '__main__':
 
     list_em = ['rf', 'en']
-    em_version = 'em1.0.1'
-    is_debug = True
-    # encoder = ce.BinaryEncoder()
-    encoder = None
-    list_model_version = ['v3.1.1', 'albert-base-v2', 'deberta-v3-base ver1']
-    n_jobs = 10
+    em_version = 'em1.0.7'
+    is_debug = False
+    encoder = None  # ce.BinaryEncoder()
+    list_model_version = ['deberta large', 'albert-base-v2', 'deberta-v3-base ver1']
+    if is_debug:
+        list_fold = ['0', '1']
+    elif is_debug is False:
+        list_fold = ['0', '1', '2', '3']
+    n_jobs = 12
+
+    # find the test set only
+    df_test = prepare_test_set(list_model_version[0], is_debug, device=None)
 
     em_trainer = EnsembleModel(list_model_version, list_em, em_version, encoder, is_debug, n_jobs=n_jobs)
-    em_trainer.find_best_model()
-    # em_trainer.refit_em_model(best_model, dict_em_best_params,  list_model_version)
+    # train model and save the string of best model
+    em_trainer.find_best_model(list_fold)
 
-    em_trainer.find_best_em()
+    em_predict_result(em_trainer, df_test, list_model_version, list_fold, is_debug)
