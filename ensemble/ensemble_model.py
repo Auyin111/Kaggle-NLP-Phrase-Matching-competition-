@@ -6,7 +6,7 @@ from ensemble.gs_analysis import all_gs_cvc
 from utils import get_score, highlight_string
 from ensemble.ensemble_model_config import EnsembleModelConfig
 from sklearn.model_selection import train_test_split
-from joblib import dump, load
+from joblib import dump
 from pathlib import Path
 
 
@@ -37,60 +37,67 @@ class EnsembleModel:
 
         return df_train_combined_valid, df_test_combined_valid
 
-    # TODO: use nested cross validation
-    def find_best_model(self):
+    def find_best_model(self, list_fold):
 
-        df_train_combined_valid, df_test_combined_valid = self._train_test_split()
-        dict_all_em_best_params = {}
+        df_all_fold_perf = pd.DataFrame()
 
-        for em in self.list_em:
+        for fold in list_fold:
 
-            self.em_cfg.change_ml_cfg(em, self.encoder)
-            if self.encoder is not None:
-                self.list_col_feat = self.list_model_version + ['fold']
-            else:
-                self.list_col_feat = self.list_model_version
+            df_fold_valid = self.df_combined_valid[self.df_combined_valid.fold == fold]
 
-            print(self.list_col_feat)
-            print(df_train_combined_valid.head())
+            df_train, df_test = train_test_split(
+                df_fold_valid,
+                test_size=0.20, random_state=self.em_cfg.random_state,
+                stratify=df_fold_valid.score)
 
-            n_jobs = 1 if em == 'en' else self.n_jobs
-            print(f'em: {em}, n_jobs: {n_jobs}')
+            for em in self.list_em:
 
-            grid = GridSearchCV(
-                self.em_cfg.pipe,
-                self.em_cfg.dict_parmas_grid,
-                verbose=1,
-                scoring=self.em_cfg.dict_plot_gs['dict_scorer'],
-                cv=self.em_cfg.cv,
-                return_train_score=self.em_cfg.return_train_score,
-                refit=self.em_cfg.selected_scorer,
-                n_jobs=n_jobs
-            )
+                self.em_cfg.change_ml_cfg(em, self.encoder)
+                if self.encoder is not None:
+                    self.list_col_feat = self.list_model_version + ['fold']
+                else:
+                    self.list_col_feat = self.list_model_version
 
-            dir_em_model = os.path.join(self.em_cfg.dir_output, self.em_version, em)
-            Path(dir_em_model).mkdir(parents=True, exist_ok=True)
-            grid = grid.fit(df_train_combined_valid[self.list_col_feat],
-                            y=df_train_combined_valid['score'],
-                            groups=df_train_combined_valid['fold'])
+                print(self.list_col_feat)
+                n_jobs = 1 if em == 'en' else self.n_jobs
+                print(f'em: {em}, n_jobs: {n_jobs}')
 
-            dict_all_em_best_params[em] = grid.best_params_
-            dump(grid, os.path.join(dir_em_model, 'model.joblib'))
+                grid = GridSearchCV(
+                    self.em_cfg.pipe,
+                    self.em_cfg.dict_parmas_grid,
+                    verbose=1,
+                    scoring=self.em_cfg.dict_plot_gs['dict_scorer'],
+                    cv=self.em_cfg.cv,
+                    return_train_score=self.em_cfg.return_train_score,
+                    refit=self.em_cfg.selected_scorer,
+                    n_jobs=n_jobs
+                )
 
-            all_gs_cvc(self.em_cfg.dict_plot_gs, grid.cv_results_, grid.best_params_, grid.best_score_,
-                       dir_html=os.path.join(dir_em_model, 'grid'))
+                dir_em_fold = os.path.join(self.em_cfg.dir_output, self.em_version, em, f'fold_{fold}')
+                Path(dir_em_fold).mkdir(parents=True, exist_ok=True)
+                grid.fit(df_train[self.list_col_feat],
+                                y=df_train['score'])
 
-            df_train_combined_valid.loc[:, em] = grid.predict(df_train_combined_valid[self.list_col_feat])
-            df_test_combined_valid.loc[:, em] = grid.predict(df_test_combined_valid[self.list_col_feat])
+                dump(grid, os.path.join(dir_em_fold, 'model.joblib'))
+                all_gs_cvc(self.em_cfg.dict_plot_gs, grid.cv_results_, grid.best_params_, grid.best_score_,
+                           dir_html=os.path.join(dir_em_fold, 'grid'))
 
-        df_perf_train = self.__compare_perf(df_train_combined_valid, dataset='em_train_set')
-        df_perf_test = self.__compare_perf(df_test_combined_valid, dataset='em_test_set')
+                df_train.loc[:, em] = grid.predict(df_train[self.list_col_feat])
+                df_test.loc[:, em] = grid.predict(df_test[self.list_col_feat])
 
-        df_perf = pd.concat([df_perf_train, df_perf_test])
-        best_model = df_perf_test[df_perf_test.score == df_perf_test.score.max()].model.values[0]
+            df_perf_train = self.__compare_perf(df_train, dataset='em_train_set')
+            df_perf_test = self.__compare_perf(df_test, dataset='em_test_set')
 
-        print(f'the model performance:\n'
-              f'{df_perf}')
+            df_perf = pd.concat([df_perf_train, df_perf_test])
+            df_perf.loc[:, 'fold'] = fold
+
+            df_all_fold_perf = pd.concat([df_all_fold_perf, df_perf])
+
+        df_avg_perf = df_all_fold_perf.groupby(['model', 'dataset']).agg({'score': 'mean'}).reset_index()
+        best_model = df_avg_perf[df_avg_perf.score == df_avg_perf.score.max()].model.values[0]
+
+        print(f'the averaged model performance:\n'
+              f'{df_avg_perf}')
         if best_model in self.list_em:
             print(highlight_string((f'the {best_model} ensemble model have'
                                     f' the best performance so use it to make prediction')))
@@ -100,13 +107,12 @@ class EnsembleModel:
                                    f'so we use {best_model} to make prediction'))
             raise Exception('TODO')
 
-        dict_em_best_params = dict_all_em_best_params[best_model]
-
-        # save best model and best parmas
-        with open(os.path.join(self.em_cfg.dir_output, self.em_version, 'dict_best_model_n_parmas.json'), "w") as fp:
-            json.dump({'best_model': best_model,
-                       'dict_em_best_params': dict_em_best_params},
+        # save the name of best model
+        with open(os.path.join(self.em_cfg.dir_em_output, 'dict_best_model.json'), "w") as fp:
+            json.dump({'best_model': best_model},
                       fp)
+
+        df_avg_perf.to_csv(os.path.join(self.em_cfg.dir_em_output, 'df_avg_perf.csv'), index=False)
 
     def __compare_perf(self, df, dataset):
 
