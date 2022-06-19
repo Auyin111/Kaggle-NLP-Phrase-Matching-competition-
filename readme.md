@@ -12,6 +12,7 @@ python prepare_upload_folder.py
 2. copy competition_patent_upload to cloud (<mark>local cmd</mark>)
 ```commandline
 scp -r C:\Users\auyin11\PycharmProjects\competition_patent_upload USERNAME@IP:./
+scp -r "C:\Users\tommy\Desktop\Machine Learning\Kaggle\USPPPM\competition_patent_upload" ubuntu@104.171.200.94:./
 ```
 
 3. connect to server (<mark>local cmd</mark>)
