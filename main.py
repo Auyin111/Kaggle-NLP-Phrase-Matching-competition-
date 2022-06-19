@@ -23,6 +23,7 @@ warnings.filterwarnings("ignore")
 pd.set_option('display.max_rows', 500)
 pd.set_option('display.max_columns', 500)
 pd.set_option('display.width', 1000)
+os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 
 # TODO: study what is it
@@ -40,12 +41,13 @@ def train_model(version, with_wandb, is_debug=False, device=None, version_protec
     cfg.logger.info(message_status)
 
     if cfg.with_wandb:
+
         try:
             wandb.init(project=f"patent_competition", entity="kaggle_winner",
                        group=f'{cfg.user}_{cfg.pretrained_model}', job_type="train",
                        name=cfg.version, notes=cfg.notes)
         except:
-            print('can not connect to wandb, it may due to internet or secret problem')
+            print(highlight_string('can not connect to wandb, it may due to internet or secret problem'), '!')
 
     seed_everything(seed=42)
 
@@ -190,13 +192,14 @@ def predict_result(version, is_debug, device=None):
 
 if __name__ == '__main__':
 
-    version = "testing"
-    version_protection = True
-    is_debug = True
+    version = "deberta-base-v2_test_2"
+    version_protection = False
+    with_wandb = True
+    is_debug = False
     if is_debug is True:
         version_protection = False
 
-    train_model(version, False, is_debug=is_debug, version_protection=version_protection)
+    train_model(version, with_wandb, is_debug=is_debug, version_protection=version_protection)
     predict_result(version, is_debug=is_debug, device='cuda')
 
     df = pd.read_csv(os.path.join('output', version, 'df_valid.csv'))

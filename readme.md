@@ -101,7 +101,7 @@ ___________________________________________________
 </details>
 
 <details>
-<summary>v4.0.1 cv ensemble stacking of ['deberta large', 'albert-base-v2', 'deberta-v3-base ver1']</summary>
+<summary>v4.0.1 cv ensemble stacking of 'deberta large', 'albert-base-v2', 'deberta-v3-base ver1'</summary>
 
 - public score in kaggle: 0.8320
 ___________________________________________________

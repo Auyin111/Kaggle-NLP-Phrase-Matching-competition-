@@ -24,6 +24,7 @@ from utils import get_score, get_distribution, plot_lr_fn
 from utils import AverageMeter, timeSince
 from tqdm import tqdm
 
+
 def train_fn(fold, train_loader, model, swa_model, criterion, optimizer, epoch, scheduler, swa_scheduler, device, cfg):  # Modified to support dynamic padding, batch sampler, swa
     model.train()
     scaler = torch.cuda.amp.GradScaler(enabled=cfg.apex)
@@ -77,7 +78,7 @@ def train_fn(fold, train_loader, model, swa_model, criterion, optimizer, epoch, 
         if step % cfg.print_freq == 0 or step == (len(train_loader) - 1):
             print('Epoch: [{0}][{1}/{2}] '
                   'Elapsed {remain:s} '
-                  'Loss: {loss.val:.4f}({loss.avg:.4f}) '
+                  'Loss(value, avg): {loss.val:.4f}({loss.avg:.4f}) '
                   'Grad: {grad_norm:.4f}  '
                   'LR: {lr:.8f}  '
                   .format(epoch + 1, step, len(train_loader),
@@ -90,17 +91,22 @@ def train_fn(fold, train_loader, model, swa_model, criterion, optimizer, epoch, 
             lrs.append(optimizer.param_groups[0]["lr"])
 
         if cfg.with_wandb:
-            wandb.log({f"[fold{fold}] loss": losses.val,
-                       f"[fold{fold}] lr": scheduler.get_lr()[0]})
-    return losses.avg, lrs
+            wandb.log({f"[fold{fold}] lr": scheduler.get_lr()[0],
+                       f"[fold{fold}] grad_norm": grad_norm,
+                       f'[fold{fold}] current_loss': losses.val,
+                       f'[fold{fold}] current_avg_loss': losses.avg
+                       })
+
+    return lrs
 
 
-def valid_fn(valid_loader, model, swa_model, criterion, epoch, device, cfg):  # Modified to support swa
+def valid_fn(data_loader, model, swa_model, criterion, epoch, device, cfg, dataset):  # Modified to support swa
     model.eval()
     losses = AverageMeter()
     preds = []
     start = end = time.time()
-    for step, inputs in enumerate(valid_loader):
+
+    for step, inputs in enumerate(data_loader):
         inputs = {k: v.to(device) for k, v in inputs.items()}
         labels = inputs["labels"]
         inputs.pop("labels")
@@ -118,25 +124,21 @@ def valid_fn(valid_loader, model, swa_model, criterion, epoch, device, cfg):  # 
             y_preds = y_preds.sigmoid()
         elif cfg.loss_fn == "CE":
             y_preds = torch.argmax(y_preds, dim=-1)
-        preds.append(y_preds.to('cpu').numpy())
+        preds.append(y_preds.to('cpu').numpy().tolist())
         end = time.time()
-        if step % cfg.print_freq == 0 or step == (len(valid_loader) - 1):
-            print('EVAL: [{0}/{1}] '
-                  'Elapsed {remain:s} '
-                  'Loss: {loss.val:.4f}({loss.avg:.4f}) '
-                  .format(step, len(valid_loader),
-                          loss=losses,
-                          remain=timeSince(start, float(step + 1) / len(valid_loader))))
+        if step % cfg.print_freq == 0 or step == (len(data_loader) - 1):
+            print(f'EVAL Dataset: {dataset} [{step}/{len(data_loader)}],'
+                  f' Elapsed: {timeSince(start, float(step + 1) / len(data_loader))}')
+
     predictions = np.concatenate(preds)
     if predictions.ndim != 1:
         predictions = np.concatenate(predictions)
 
-    return losses.avg, predictions
+    return losses.val, losses.avg, predictions
 
 
-def train_loop(folds, fold,
-               cfg,
-               ):
+def train_loop(folds, fold, cfg):
+
     cfg.logger.info(f"========== fold: {fold} training ==========")
 
     # ====================================================
@@ -145,9 +147,13 @@ def train_loop(folds, fold,
 
     train_folds = folds[folds['fold'] != fold].reset_index(drop=True)
     valid_folds = folds[folds['fold'] == fold].reset_index(drop=True)
+    train_labels = train_folds['score']
     valid_labels = valid_folds['score']
     if cfg.target_size == 5:
-        valid_labels = valid_labels.apply(lambda x: torch.argmax(x).item()) # Decode one-hot labels to index (python int dtype)
+        # Decode one-hot labels to index (python int dtype)
+        train_labels = train_labels.apply(lambda x: torch.argmax(x).item())
+        valid_labels = valid_labels.apply(lambda x: torch.argmax(x).item())
+    train_labels = train_labels.values
     valid_labels = valid_labels.values
 
     train_dataset = TrainDataset(cfg, train_folds)
@@ -171,7 +177,7 @@ def train_loop(folds, fold,
                               sampler=sampler,
                               num_workers=cfg.num_workers,
                               collate_fn=collator,
-                              pin_memory=True, drop_last=True)
+                              pin_memory=True, drop_last=False)
     valid_loader = DataLoader(valid_dataset,
                               batch_size=cfg.batch_size,
                               shuffle=False,
@@ -273,48 +279,55 @@ def train_loop(folds, fold,
         start_time = time.time()
 
         # train_predict
-        avg_loss, lrs = train_fn(fold, train_loader, model, swa_model, criterion, optimizer, epoch, scheduler, swa_scheduler, cfg.device, cfg)
+        lrs = train_fn(fold, train_loader, model, swa_model, criterion, optimizer, epoch, scheduler, swa_scheduler, cfg.device, cfg)
 
-        # eval
-        avg_val_loss, predictions = valid_fn(valid_loader, model, swa_model, criterion, epoch, cfg.device, cfg)
+        # eval training and validation set
+        train_loss, avg_train_loss, train_predictions = valid_fn(train_loader, model, swa_model, criterion, epoch,
+                                                                 cfg.device, cfg, 'train')
+        val_loss, avg_val_loss, valid_predictions = valid_fn(valid_loader, model, swa_model, criterion, epoch,
+                                                               cfg.device, cfg, 'valid')
 
-        # scoring
-        print(f"epoch {epoch} getting score:")
-        score = get_score(valid_labels, predictions)
+        train_score = get_score(train_labels, train_predictions)
+        valid_score = get_score(valid_labels, valid_predictions)
         lrs_list += lrs
 
         elapsed = time.time() - start_time
 
         cfg.logger.info(
-            f'Epoch {epoch + 1} - avg_train_loss: {avg_loss:.4f}  avg_val_loss: {avg_val_loss:.4f}  time: {elapsed:.0f}s')
-        cfg.logger.info(f'Epoch {epoch + 1} - Score: {score:.4f}')
+            f'Epoch {epoch + 1}, time: {elapsed:.0f}s '
+            f'train_loss: {train_loss:.4f}, avg_train_loss: {avg_train_loss:.4f}, train_score: {train_score:.4f}')
+        cfg.logger.info(f'val_loss: {val_loss:.4f}, avg_val_loss: {avg_val_loss:.4f}, valid_score: {valid_score:.4f}')
+
         if cfg.with_wandb:
             wandb.log({f"[fold{fold}] epoch": epoch + 1,
-                       f"[fold{fold}] avg_train_loss": avg_loss,
+                       f"[fold{fold}] train_loss": train_loss,
+                       f"[fold{fold}] avg_train_loss": avg_train_loss,
+                       f"[fold{fold}] train_score": train_score,
+                       f"[fold{fold}] val_loss": val_loss,
                        f"[fold{fold}] avg_val_loss": avg_val_loss,
-                       f"[fold{fold}] score": score})
+                       f"[fold{fold}] valid_score": valid_score})
 
         # Handle model saving behavior with swa and early stopping
 
         if cfg.use_swa:
             if epoch == cfg.epochs:
                 torch.save({'model': swa_model.state_dict(),
-                            'predictions': predictions},
+                            'predictions': valid_predictions},
                            path_model)
                 cfg.logger.info("SWA model saved")
             else:
                 cfg.logger.info("SWA enabled, model would only be saved on the last epoch")
         else:
             if cfg.early_stopping:
-                if (best_score < score) or (epoch == 0):
+                if (best_score < valid_score) or (epoch == 0):
 
                     cfg.logger.info(highlight_string(
-                        f'in epoch {epoch}, the validation score was improved from {best_score} to {score}'))
+                        f'in epoch {epoch}, the validation score was improved from {best_score} to {valid_score}'))
 
-                    best_score = score
+                    best_score = valid_score
                     cfg.logger.info(f'Epoch {epoch + 1} - Save Best Score: {best_score:.4f} Model')
                     torch.save({'model': model.state_dict(),
-                                'predictions': predictions},
+                                'predictions': valid_predictions},
                                path_model)
                     # reset es_patience_count
                     es_patience_count = 0
@@ -332,7 +345,7 @@ def train_loop(folds, fold,
 
             else:
                 torch.save({'model': model.state_dict(),
-                            'predictions': predictions},
+                            'predictions': valid_predictions},
                            path_model)
                 cfg.logger.info(f'Model updated (Early stopping disabled)')
 
@@ -342,7 +355,7 @@ def train_loop(folds, fold,
         parallel_plot = Process(target=plot_lr_fn, args=(lrs_list,))
         parallel_plot.start()
 
-    valid_folds['pred'] = predictions
+    valid_folds['pred'] = valid_predictions
 
     torch.cuda.empty_cache()
     gc.collect()

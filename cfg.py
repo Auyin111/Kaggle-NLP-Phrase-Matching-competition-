@@ -30,7 +30,7 @@ class Cfg:
             self.n_fold = 2
             self.trn_fold = [0, 1]
         else:
-            self.epochs = 10
+            self.epochs = 15
             # CV
             self.n_fold = 4
             self.trn_fold = [0, 1, 2, 3]
@@ -71,12 +71,13 @@ class Cfg:
     batch_distribution = 'context'  # ['label', 'context', None]
 
     # Model
-    pretrained_model = "albert-base-v2"  # ["microsoft/deberta-v3-base", "albert-base-v2", "microsoft/mdeberta-v3-base", "xlm-roberta-base"]
+    # ["microsoft/deberta-v3-base", "albert-base-v2", "microsoft/mdeberta-v3-base", "xlm-roberta-base"]
+    pretrained_model = "microsoft/deberta-v3-base"
     target_size = 1  # 1 = regression, 5 = classification
 
     # Optimizer
     loss_fn = "MSE"  # ["MSE", "BCE", "BCEWithLogits", "CCC1", "CCC2", "PCC", "CE"]
-    scheduler='cosine'  # ['linear', 'cosine', 'cosine_annealing']
+    scheduler = 'cosine'  # ['linear', 'cosine', 'cosine_annealing']
     num_cycles = 0.5  # For 'linear' or 'cosine' only
     num_warmup_steps = 1000  # For 'linear' or 'cosine' only
     encoder_lr = 3e-5
