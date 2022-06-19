@@ -295,8 +295,8 @@ def train_loop(folds, fold, cfg):
 
         cfg.logger.info(
             f'Epoch {epoch + 1}, time: {elapsed:.0f}s '
-            f'train_loss: {train_loss:.4f}, avg_train_loss: {avg_train_loss:.4f}, train_score: {train_score:.4f}'
-            f'val_loss: {val_loss:.4f}, avg_val_loss: {avg_val_loss:.4f}, valid_score: {valid_score:.4f}')
+            f'train_loss: {train_loss:.4f}, avg_train_loss: {avg_train_loss:.4f}, train_score: {train_score:.4f}')
+        cfg.logger.info(f'val_loss: {val_loss:.4f}, avg_val_loss: {avg_val_loss:.4f}, valid_score: {valid_score:.4f}')
 
         if cfg.with_wandb:
             wandb.log({f"[fold{fold}] epoch": epoch + 1,
