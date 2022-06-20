@@ -13,6 +13,7 @@ from torch.utils.data import DataLoader
 from train_predict.inference import inference_fn
 from transformers import AutoTokenizer, DataCollatorWithPadding
 from gen_data.dataset import create_text, merge_context
+from torch.optim.swa_utils import AveragedModel
 
 
 # TODO: improve
@@ -75,9 +76,14 @@ def predict_result(version, df_test, is_debug, device=None):
 
     df_pred = pd.DataFrame()
     for fold in cfg.trn_fold:
-        model = CustomModel(cfg,
+        model_ = CustomModel(cfg,
                             config_path=os.path.join(cfg.dir_output, 'model.config'),
                             pretrained=False)
+        if cfg.use_swa:
+            model = AveragedModel(model_)
+        else:
+            model = model_
+
         # load specific model parameter
         state = torch.load(os.path.join(cfg.dir_output, 'model', f"fold_{fold}_best.model"),
                            map_location=torch.device(cfg.device))
@@ -119,10 +125,20 @@ def em_predict_result(em_trainer, df_test, list_model_version, list_fold, is_deb
 if __name__ == '__main__':
 
     list_em = ['rf', 'en']
-    em_version = 'em1.0.7'
+    em_version = 'em1.0.17'
     is_debug = False
     encoder = None  # ce.BinaryEncoder()
-    list_model_version = ['deberta large', 'albert-base-v2', 'deberta-v3-base ver1']
+    list_model_version = [
+        'bert-for-patents_MSE_BS64_grp2short_v1',
+        'deberta_base_MSE_BS64_grp2short_v1',
+        # 'deberta_large_MSE_BS64_grp2short_v1',
+
+        # 'roberta-large_MSE_BS64_grp2short_v1',
+        'deberta_large_MSE_BS64_grp2short_v2head_E12',
+
+        'albert-base-v2',
+
+]
     if is_debug:
         list_fold = ['0', '1']
     elif is_debug is False:
@@ -136,4 +152,4 @@ if __name__ == '__main__':
     # train model and save the string of best model
     em_trainer.find_best_model(list_fold)
 
-    em_predict_result(em_trainer, df_test, list_model_version, list_fold, is_debug)
+    # em_predict_result(em_trainer, df_test, list_model_version, list_fold, is_debug)
