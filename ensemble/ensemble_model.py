@@ -29,14 +29,6 @@ class EnsembleModel:
 
         self.list_col_feat = None
 
-    def _train_test_split(self):
-        df_train_combined_valid, df_test_combined_valid = train_test_split(
-            self.df_combined_valid,
-            test_size=0.20, random_state=42,
-            stratify=self.df_combined_valid.fold)
-
-        return df_train_combined_valid, df_test_combined_valid
-
     def find_best_model(self, list_fold):
 
         df_all_fold_perf = pd.DataFrame()
@@ -94,7 +86,8 @@ class EnsembleModel:
             df_all_fold_perf = pd.concat([df_all_fold_perf, df_perf])
 
         df_avg_perf = df_all_fold_perf.groupby(['model', 'dataset']).agg({'score': 'mean'}).reset_index()
-        best_model = df_avg_perf[df_avg_perf.score == df_avg_perf.score.max()].model.values[0]
+        df_em_test_set = df_avg_perf[df_avg_perf.dataset == 'em_test_set']
+        best_model = df_em_test_set[df_em_test_set.score == df_em_test_set.score.max()].model.values[0]
 
         print(f'the averaged model performance:\n'
               f'{df_avg_perf}')

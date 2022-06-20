@@ -12,7 +12,7 @@ corr_scorer = make_scorer(get_score, greater_is_better=True)
 
 class EnsembleModelConfig:
 
-    def __init__(self, em_version, is_debug, random_state=42):
+    def __init__(self, em_version, is_debug, random_state=39):
 
         self.current_time = datetime.datetime.now().strftime("%Y-%m-%d %H_%M_%S")
         self.dir_output = os.path.join('output')
