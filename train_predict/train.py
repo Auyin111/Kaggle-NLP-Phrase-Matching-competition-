@@ -7,10 +7,11 @@ import torch.nn as nn
 import torch.nn.functional as F
 import time
 import os
+import shutil
 from multiprocessing import Process  # For displaying learning rate plot without blocking
 
 from gen_data.dataset import TrainDataset
-from model.model import CustomModel, CustomModel_Original
+from model.model import CustomModel
 from train_predict.loss_functions import PCCLoss, CCCLoss1, CCCLoss2
 
 from torch.utils.data import DataLoader
@@ -20,7 +21,7 @@ from torch.optim.lr_scheduler import CosineAnnealingLR  ## New ##
 
 from transformers import get_linear_schedule_with_warmup, get_cosine_schedule_with_warmup, DataCollatorWithPadding
 from utils import get_score, get_distribution, plot_lr_fn
-from utils import AverageMeter, timeSince
+from utils import AverageMeter, timeSince, highlight_string
 from tqdm import tqdm
 
 def train_fn(fold, train_loader, model, swa_model, criterion, optimizer, epoch, scheduler, swa_scheduler, device, cfg):  # Modified to support dynamic padding, batch sampler, swa
@@ -56,12 +57,8 @@ def train_fn(fold, train_loader, model, swa_model, criterion, optimizer, epoch, 
 
             if cfg.batch_scheduler:
                 if epoch + 1 >= cfg.swa_start and cfg.use_swa:
-                    if swa_model == None:
-                        swa_model = AveragedModel(model)
-                    else:
-                        swa_model.update_parameters(model)
-                        swa_scheduler.step()
-
+                    swa_model.update_parameters(model)
+                    swa_scheduler.step()
                 else:
                     scheduler.step()
 
@@ -170,7 +167,7 @@ def train_loop(folds, fold,
                               sampler=sampler,
                               num_workers=cfg.num_workers,
                               collate_fn=collator,
-                              pin_memory=True, drop_last=True)
+                              pin_memory=True, drop_last=False)
     valid_loader = DataLoader(valid_dataset,
                               batch_size=cfg.batch_size,
                               shuffle=False,
@@ -184,10 +181,13 @@ def train_loop(folds, fold,
     model = CustomModel(cfg, config_path=None, pretrained=True)
     model.to(cfg.device)
 
-    if fold == 0:
+    if fold == 0:  # Copy the essential files for model loading in prediction
         torch.save(model.config, os.path.join(cfg.dir_output, 'model.config'))
-        os.system(f"copy cfg.py {os.path.join(cfg.dir_output, 'cfg.py')}")  # Copy the essential files for model loading in prediction
-        os.system(f"copy model\model.py {os.path.join(cfg.dir_output, 'model.py')}")
+        shutil.copyfile('cfg.py', os.path.join(cfg.dir_output, 'cfg.py'))
+        if os.path.isfile('model/model.py'):
+            shutil.copyfile('model/model.py', os.path.join(cfg.dir_output, 'model.py'))
+        else:
+            shutil.copyfile('model\model.py', os.path.join(cfg.dir_output, 'model.py'))
 
     def get_optimizer_params(model, encoder_lr, decoder_lr, weight_decay=0.0):
         param_optimizer = list(model.named_parameters())
@@ -232,7 +232,7 @@ def train_loop(folds, fold,
     # swa initialization (new)
     # ====================================================
 
-    swa_model = None
+    swa_model = AveragedModel(model)
     swa_scheduler = SWALR(optimizer, anneal_epochs=cfg.anneal_steps, swa_lr=cfg.swa_lr) if cfg.use_swa else None
 
     # ====================================================
@@ -295,7 +295,7 @@ def train_loop(folds, fold,
         # Handle model saving behavior with swa and early stopping
 
         if cfg.use_swa:
-            if epoch == cfg.epochs:
+            if epoch + 1 == cfg.epochs:
                 torch.save({'model': swa_model.state_dict(),
                             'predictions': predictions},
                            path_model)
@@ -305,16 +305,35 @@ def train_loop(folds, fold,
         else:
             if cfg.early_stopping:
                 if (best_score < score) or (epoch == 0):
+
+                    cfg.logger.info(highlight_string(
+                        f'in epoch {epoch}, the validation score was improved from {best_score} to {score}'))
+
                     best_score = score
                     cfg.logger.info(f'Epoch {epoch + 1} - Save Best Score: {best_score:.4f} Model')
                     torch.save({'model': model.state_dict(),
                                 'predictions': predictions},
                                path_model)
+                    # reset es_patience_count
+                    es_patience_count = 0
+
+                else:
+                    es_patience_count += 1
+                    cfg.logger.info(highlight_string(f'in epoch {epoch}, no any improvement '
+                                    f'(es_patience_count: {es_patience_count}/{cfg.es_patience})'))
+
+                    if es_patience_count == cfg.es_patience:
+                        cfg.logger.info(highlight_string(
+                            'the training process is stopped by early stopping setup', '!'))
+                        print()
+                        break
+
             else:
                 torch.save({'model': model.state_dict(),
                             'predictions': predictions},
                            path_model)
                 cfg.logger.info(f'Model updated (Early stopping disabled)')
+
 
     # Plot learning rate in parallel process
 

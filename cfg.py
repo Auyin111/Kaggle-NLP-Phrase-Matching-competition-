@@ -72,7 +72,7 @@ class Cfg:
     batch_distribution = 'context'  # ['label', 'context', None]
 
     # Model
-    pretrained_model = "albert-base-v2"  # ["microsoft/deberta-v3-base", "albert-base-v2", "microsoft/mdeberta-v3-base", "xlm-roberta-base"]
+    pretrained_model = "microsoft/deberta-v3-large"  # ["microsoft/deberta-v3-base", "albert-base-v2", "microsoft/mdeberta-v3-base", "xlm-roberta-base", "microsoft/deberta-v3-large", "anferico/bert-for-patents"]
     target_size = 1  # 1 = regression, 5 = classification
 
     # Optimizer
@@ -92,7 +92,8 @@ class Cfg:
     # Stochastic weight average (New)
     use_swa = False
     early_stopping = True
-    swa_start = 8  # swa starts at this epoch
+    es_patience = 5
+    swa_start = 10  # swa starts at this epoch
     swa_lr = 1e-5
     anneal_steps = 800
 
