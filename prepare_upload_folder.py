@@ -10,11 +10,21 @@ if __name__ == '__main__':
     dir_source = os.getcwd()
     dir_destination = os.path.join(os.path.dirname(dir_source), 'competition_patent_upload')
 
-    list_model_version = ['deberta large', 'albert-base-v2', 'deberta-v3-base ver1']
+    list_model_version = [
+        'bert-for-patents_MSE_BS64_grp2short_v1',
+        'deberta_base_MSE_BS64_grp2short_v1',
+        # 'deberta_large_MSE_BS64_grp2short_v1',
+
+        # 'roberta-large_MSE_BS64_grp2short_v1',
+        'deberta_large_MSE_BS64_grp2short_v2head_E12',
+
+        'albert-base-v2',
+
+        'em1.0.17']
 
     list_cp_content = ['model', 'own_dataset', 'train_predict', 'gen_data',
                        'cfg.py', 'main.py', 'utils.py', 'kaggle',
-                       'ensemble', 'em_main.py', 'em1.0.7',
+                       'ensemble', 'em_main.py',
                        'paperspace_setup.sh', 'linux_pantent_requirement.txt', 'run_main.sh']
 
     Path(dir_source).mkdir(parents=True, exist_ok=True)
