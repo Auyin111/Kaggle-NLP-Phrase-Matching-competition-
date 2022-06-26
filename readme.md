@@ -39,19 +39,20 @@ bash competition_patent_upload/run_main.sh
 <summary>v3.1.1 (reference model)</summary>
 
 - cv score in kaggle: 0.8101
-___________________________________________________
+---
 
 - When to stop the training? 
   - train with all epoch and replace original model if Pearson correlation is better
 - What is the original ensemble method? 
   - use 4 cross validation model to predict 4 score then average 4 score
+---
 </details>
 
 <details>
 <summary>v4.0.0</summary>
 
 - public score in kaggle: 0.8141
-___________________________________________________
+---
   
   1. Training Data: 
   
@@ -98,15 +99,38 @@ ___________________________________________________
     d. Saving the cfg.py and model.py used by the current version to the output directory right before training
   
   6. Add early stopping patience
-  
+---
 </details>
 
 <details>
 <summary>v4.0.1 cv ensemble stacking of 'deberta large', 'albert-base-v2', 'deberta-v3-base ver1'</summary>
 
 - public score in kaggle: 0.8320
-___________________________________________________
+---
 
 - use rf and en as meta learner
 - use cv ensemble to average the prediction
+---
+</details>
+
+<details>
+<summary>v4.1.0 <mark>(submission version)</mark> cv ensemble stacking of deberta large, deberta base, bert for patents, roberta and albert<br>
+</summary>
+
+- **The ranking of competition is <mark>526/1889 Teams (Top 27.8%)</mark>**
+- public and private score in kaggle submission 1: 0.8422 and 0.8550
+- public and private score in kaggle submission 2: 0.8417 and 0.8571
+---
+
+base model detail:
+- deberta_large_MSE_BS32_grp2short_v2head_Ep12' <br>
+- deberta_base_MSE_BS64_grp2short_v2head_epoch20' <br>
+- bert-for-patents_MSE_BS32_grp2short_v2head_epoch12 <br>
+- roberta-base_MSE_BS32_grp2short_v2head_epoch12 <br>
+- albert-base-v2
+
+ensemble model:
+- use rf and en as meta learner
+- use cv ensemble to average the prediction
+---
 </details>
