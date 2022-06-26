@@ -13,6 +13,7 @@ import datetime
 from utils import highlight_string
 from gen_data.dataset import TestDataset, find_max_len
 from torch.utils.data import DataLoader
+from torch.optim.swa_utils import AveragedModel
 from model.model import CustomModel
 from train_predict.inference import inference_fn
 from transformers import AutoTokenizer, DataCollatorWithPadding
@@ -26,10 +27,6 @@ pd.set_option('display.width', 1000)
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 
-# TODO: study what is it
-# %env TOKENIZERS_PARALLELISM=true
-
-
 def train_model(version, with_wandb, is_debug=False, device=None, version_protection=True):
 
     # setting
@@ -40,8 +37,7 @@ def train_model(version, with_wandb, is_debug=False, device=None, version_protec
     message_status = highlight_string(f'start train {cfg.version} model at {current_time} (is_debug: {cfg.is_debug})')
     cfg.logger.info(message_status)
 
-    if cfg.with_wandb:
-
+    if cfg.with_wandb and is_debug is False:  # Don't use wandb in debug mode
         try:
             wandb.init(project=f"patent_competition", entity="kaggle_winner",
                        group=f'{cfg.user}_{cfg.pretrained_model}', job_type="train",
@@ -53,7 +49,7 @@ def train_model(version, with_wandb, is_debug=False, device=None, version_protec
 
     # Conflict testing
 
-    if version_protection == True:  # Allow disabling version protection for testing
+    if version_protection is True:  # Allow disabling version protection for testing
         if not os.path.exists(cfg.dir_output):
             os.makedirs(cfg.dir_output)
         else:
@@ -92,7 +88,7 @@ def train_model(version, with_wandb, is_debug=False, device=None, version_protec
 
     df_train = create_text(df_train, cfg.use_grp_2, cfg.use_mentioned_groups)
     print(f"Length of the training set: {len(df_train)}")
-    print(df_train["text"][:10])
+    print(f"Name of the columns: {df_train.columns}")
 
     # tokenizer
     cfg.tokenizer = AutoTokenizer.from_pretrained(cfg.pretrained_model)
@@ -173,9 +169,13 @@ def predict_result(version, is_debug, device=None):
 
     predictions = []
     for fold in cfg.trn_fold:
-        model = CustomModel(cfg,
+        model_ = CustomModel(cfg,
                             config_path=os.path.join(cfg.dir_output, 'model.config'),
                             pretrained=False)
+        if cfg.use_swa:
+            model = AveragedModel(model_)
+        else:
+            model = model_
         state = torch.load(os.path.join(cfg.dir_output, 'model', f"fold_{fold}_best.model"),
                            map_location=torch.device(cfg.device))
         model.load_state_dict(state['model'])
@@ -192,10 +192,10 @@ def predict_result(version, is_debug, device=None):
 
 if __name__ == '__main__':
 
-    version = "deberta-base-v2_test_2"
+    version = "deberta_large_MSE_BS32_grp2short_v2head"  #"deberta_large_MSE_BS64_grp2short"
     version_protection = False
-    with_wandb = True
-    is_debug = False
+    with_wandb = False
+    is_debug = True
     if is_debug is True:
         version_protection = False
 

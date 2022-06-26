@@ -92,6 +92,7 @@ def create_text(df, use_grp_2=True, use_mentioned_groups=False):
         df.loc[:, 'text'] = np.where(df.text_grp_2.isnull(), df.text,
                                      df.text + "; " + df.text_grp_2)  # Treat group1 and group2 context as same text, separating by "; " insteadt of "[SEP]"
     if use_mentioned_groups:
+        df['text'] = df.text + "[SEP]" + df.context
         df.loc[:, 'text'] = np.where(df.mentioned_groups_grp_2.isnull(), df.text, df.text + "[SEP]" + df.mentioned_groups_grp_2)
 
     return df

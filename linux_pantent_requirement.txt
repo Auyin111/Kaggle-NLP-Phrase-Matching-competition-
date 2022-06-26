@@ -1,11 +1,7 @@
-pytorch==1.10.0
-torchvision==0.11.0
-torchaudio==0.10.0
-cudatoolkit==11.3.1
-
-transformers==4.19.1
-sentencepiece==0.1.96
-tokenizers==0.12.1
+Hello Phoebe, may I know are there any permanent role that are still available at the moment, especially anything IT related?
+As you may tell I'm quite a technical oriented guy that I'm having experience on not only programming, mathematics and machine learning,
+but quite a lot of photo and video editing skills as well, which I think it could come handy in advertisement or other 
+production works.
 
 pandas==1.4.2
 scikit-learn==1.1.1

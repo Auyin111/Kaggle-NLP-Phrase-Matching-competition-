@@ -125,20 +125,16 @@ def em_predict_result(em_trainer, df_test, list_model_version, list_fold, is_deb
 if __name__ == '__main__':
 
     list_em = ['rf', 'en']
-    em_version = 'em1.0.17'
+    em_version = 'submission_ver_1'
     is_debug = False
     encoder = None  # ce.BinaryEncoder()
     list_model_version = [
-        'bert-for-patents_MSE_BS64_grp2short_v1',
-        'deberta_base_MSE_BS64_grp2short_v1',
-        # 'deberta_large_MSE_BS64_grp2short_v1',
-
-        # 'roberta-large_MSE_BS64_grp2short_v1',
-        'deberta_large_MSE_BS64_grp2short_v2head_E12',
-
-        'albert-base-v2',
-
-]
+        'deberta_large_MSE_BS32_grp2short_v2head_Ep12',
+        'deberta_base_MSE_BS64_grp2short_v2head_epoch20',
+        'bert-for-patents_MSE_BS32_grp2short_v2head_epoch12',
+        'roberta-base_MSE_BS32_grp2short_v2head_epoch12',
+        'albert-base-v2'
+    ]
     if is_debug:
         list_fold = ['0', '1']
     elif is_debug is False:
@@ -151,5 +147,4 @@ if __name__ == '__main__':
     em_trainer = EnsembleModel(list_model_version, list_em, em_version, encoder, is_debug, n_jobs=n_jobs)
     # train model and save the string of best model
     em_trainer.find_best_model(list_fold)
-
-    # em_predict_result(em_trainer, df_test, list_model_version, list_fold, is_debug)
+    em_predict_result(em_trainer, df_test, list_model_version, list_fold, is_debug)

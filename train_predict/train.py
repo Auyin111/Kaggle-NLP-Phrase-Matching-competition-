@@ -7,11 +7,11 @@ import torch.nn as nn
 import torch.nn.functional as F
 import time
 import os
-from utils import highlight_string
+import shutil
 from multiprocessing import Process  # For displaying learning rate plot without blocking
 
 from gen_data.dataset import TrainDataset
-from model.model import CustomModel, CustomModel_Original
+from model.model import CustomModel
 from train_predict.loss_functions import PCCLoss, CCCLoss1, CCCLoss2
 
 from torch.utils.data import DataLoader
@@ -21,7 +21,7 @@ from torch.optim.lr_scheduler import CosineAnnealingLR  ## New ##
 
 from transformers import get_linear_schedule_with_warmup, get_cosine_schedule_with_warmup, DataCollatorWithPadding
 from utils import get_score, get_distribution, plot_lr_fn
-from utils import AverageMeter, timeSince
+from utils import AverageMeter, timeSince, highlight_string
 from tqdm import tqdm
 
 
@@ -191,10 +191,13 @@ def train_loop(folds, fold, cfg):
     model = CustomModel(cfg, config_path=None, pretrained=True)
     model.to(cfg.device)
 
-    if fold == 0:
+    if fold == 0:  # Copy the essential files for model loading in prediction
         torch.save(model.config, os.path.join(cfg.dir_output, 'model.config'))
-        os.system(f"copy cfg.py {os.path.join(cfg.dir_output, 'cfg.py')}")  # Copy the essential files for model loading in prediction
-        os.system(f"copy model\model.py {os.path.join(cfg.dir_output, 'model.py')}")
+        shutil.copyfile('cfg.py', os.path.join(cfg.dir_output, 'cfg.py'))
+        if os.path.isfile('model/model.py'):
+            shutil.copyfile('model/model.py', os.path.join(cfg.dir_output, 'model.py'))
+        else:
+            shutil.copyfile('model\model.py', os.path.join(cfg.dir_output, 'model.py'))
 
     def get_optimizer_params(model, encoder_lr, decoder_lr, weight_decay=0.0):
         param_optimizer = list(model.named_parameters())
@@ -239,7 +242,7 @@ def train_loop(folds, fold, cfg):
     # swa initialization (new)
     # ====================================================
 
-    swa_model = None
+    swa_model = AveragedModel(model)
     swa_scheduler = SWALR(optimizer, anneal_epochs=cfg.anneal_steps, swa_lr=cfg.swa_lr) if cfg.use_swa else None
 
     # ====================================================
