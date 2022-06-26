@@ -117,7 +117,7 @@ bash competition_patent_upload/run_main.sh
 <summary>v4.1.0 <mark>(submission version)</mark> cv ensemble stacking of deberta large, deberta base, bert for patents, roberta and albert<br>
 </summary>
 
-- **The ranking of competition is <mark>526/1889 Teams (Top 27.8%)</mark>**
+- **The ranking of competition is [526/1889 Teams (Top 27.8%)](https://www.kaggle.com/auyin111/competitions?tab=completed)**
 - public and private score in kaggle submission 1: 0.8422 and 0.8550
 - public and private score in kaggle submission 2: 0.8417 and 0.8571
 ---
