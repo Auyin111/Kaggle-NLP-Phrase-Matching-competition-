@@ -6,18 +6,13 @@ from pathlib import Path
 
 if __name__ == '__main__':
 
-    # TODO: use reference path
     dir_source = os.getcwd()
     dir_destination = os.path.join(os.path.dirname(dir_source), 'competition_patent_upload')
 
     list_model_version = [
         'bert-for-patents_MSE_BS64_grp2short_v1',
         'deberta_base_MSE_BS64_grp2short_v1',
-        # 'deberta_large_MSE_BS64_grp2short_v1',
-
-        # 'roberta-large_MSE_BS64_grp2short_v1',
         'deberta_large_MSE_BS64_grp2short_v2head_E12',
-
         'albert-base-v2',
 
         'em1.0.17']

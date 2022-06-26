@@ -30,7 +30,7 @@ class Cfg:
             self.n_fold = 2
             self.trn_fold = [0, 1]
         else:
-            self.epochs = 15
+            self.epochs = 10
             # CV
             self.n_fold = 4
             self.trn_fold = [0, 1, 2, 3]

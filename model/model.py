@@ -58,6 +58,70 @@ class CustomModel_Original(nn.Module):
         return output
 
 # ====================================================
+# Original Model with LayerNorm and Mean Pooler
+# ====================================================
+
+class CustomModel(nn.Module):
+    def __init__(self, cfg, config_path=None, pretrained=False):
+        super().__init__()
+        self.cfg = cfg
+        if config_path is None:
+            self.config = AutoConfig.from_pretrained(cfg.pretrained_model, output_hidden_states=True)
+        else:
+            self.config = torch.load(config_path)
+        if pretrained:
+            self.model = AutoModel.from_pretrained(cfg.pretrained_model, config=self.config)
+        else:
+            self.model = AutoModel.from_config(self.config)
+        self.fc_dropout = nn.Dropout(cfg.dropout_prop)
+        self.fc = nn.Linear(self.config.hidden_size, self.cfg.target_size)
+        self._init_weights(self.fc)
+        self.attention = nn.Sequential(
+            nn.Linear(self.config.hidden_size, 512),
+            nn.Tanh(),
+            nn.Linear(512, 1),
+            nn.Softmax(dim=1)
+        )
+        self.layer_norm1 = nn.LayerNorm(self.config.hidden_size)
+        self._init_weights(self.attention)
+        self.linear = nn.Linear(self.config.hidden_size, 1)
+
+    def _init_weights(self, module):
+        if isinstance(module, nn.Linear):
+            module.weight.data.normal_(mean=0.0, std=self.config.initializer_range)
+            if module.bias is not None:
+                module.bias.data.zero_()
+        elif isinstance(module, nn.Embedding):
+            module.weight.data.normal_(mean=0.0, std=self.config.initializer_range)
+            if module.padding_idx is not None:
+                module.weight.data[module.padding_idx].zero_()
+        elif isinstance(module, nn.LayerNorm):
+            module.bias.data.zero_()
+            module.weight.data.fill_(1.0)
+
+    def feature(self, inputs):
+        outputs = self.model(**inputs)
+        last_hidden_states = outputs[0]
+        # feature = torch.mean(last_hidden_states, 1)
+        weights = self.attention(last_hidden_states)
+        feature = torch.sum(weights * last_hidden_states, dim=1)
+        return feature
+
+    def forward(self, inputs):
+        outputs = self.model(**inputs)
+        last_hidden_state = outputs[0]
+        input_mask_expanded = inputs["attention_mask"].unsqueeze(-1).expand(last_hidden_state.size()).float()
+        sum_embeddings = torch.sum(last_hidden_state * input_mask_expanded, 1)
+        sum_mask = input_mask_expanded.sum(1)
+        sum_mask = torch.clamp(sum_mask, min=1e-9)
+        out = sum_embeddings / sum_mask
+
+        out = self.layer_norm1(out)
+        output = self.fc(out)
+
+        return output
+
+# ====================================================
 # Multi Sample Dropout (MSD)
 # ====================================================
 
@@ -148,7 +212,7 @@ class MHSA(nn.Module):
 # Model with MSD + Mixed Hidden Layers + MH_self_Attention
 # ====================================================
 
-class CustomModel(nn.Module):
+class CustomModel_NotUsingThis(nn.Module):
     def __init__(self, cfg, config_path=None, pretrained=False):
         super().__init__()
         self.cfg = cfg
@@ -161,7 +225,7 @@ class CustomModel(nn.Module):
         else:
             self.model = AutoModel.from_config(self.config)
 
-        self.mixing_layers = nn.Linear(self.config.num_hidden_layers + 1, 1)
+        self.mixing_layers = nn.Linear(self.config.num_hidden_layers + 2, 1)
         self._init_weights(self.mixing_layers)
 
         self.MHSA = MHSA(self.config.hidden_size, self.cfg, self.config)
@@ -186,7 +250,7 @@ class CustomModel(nn.Module):
 
     def mixing_hidden_layers(self, inputs):
         model_list1 = ["albert-base-v2", "xlm-roberta-base"]  # Models with dim(output) == 4
-        model_list2 = ["microsoft/deberta-v3-base", "microsoft/mdeberta-v3-base"]  # Models with dim(output) == 3
+        model_list2 = ["microsoft/deberta-v3-base", "microsoft/mdeberta-v3-base", "microsoft/deberta-v3-large"]  # Models with dim(output) == 3
         #print(self.model(**inputs))
         if self.cfg.pretrained_model in model_list1:
             all_layers = [layer for layer in self.model(**inputs)[2]]
@@ -194,6 +258,7 @@ class CustomModel(nn.Module):
             all_layers = [layer for layer in self.model(**inputs)[1]]
         else:
             raise Exception("New model is being used, please confirm the model output length in 'mixing_hidden_layers'.")
+        all_layers = all_layers + [self.model(**inputs)[0]]
         all_layers = torch.stack(all_layers, dim=-1)
         mixed_layer_embeddings = torch.squeeze(self.mixing_layers(all_layers), dim=-1)
         return mixed_layer_embeddings
@@ -206,3 +271,72 @@ class CustomModel(nn.Module):
             return self.sigmoid(output)
         return output
 
+# ====================================================
+# Model with MSD + Mixed Hidden Layers + Original Head
+# ====================================================
+
+class CustomModel_2(nn.Module):
+    def __init__(self, cfg, config_path=None, pretrained=False):
+        super().__init__()
+        self.cfg = cfg
+        if config_path is None:
+            self.config = AutoConfig.from_pretrained(cfg.pretrained_model, output_hidden_states=True)
+        else:
+            self.config = torch.load(config_path)
+        if pretrained:
+            self.model = AutoModel.from_pretrained(cfg.pretrained_model, config=self.config)
+        else:
+            self.model = AutoModel.from_config(self.config)
+
+        self.mixing_layers = nn.Linear(self.config.num_hidden_layers + 2, 1)
+        self._init_weights(self.mixing_layers)
+
+        self.attention = nn.Sequential(
+            nn.Linear(self.config.hidden_size, 512),
+            nn.Tanh(),
+            nn.Linear(512, 1),
+            nn.Softmax(dim=1))
+        self._init_weights(self.attention)
+
+        self.final_forward = nn.Sequential(Dropout_Linear(self.config.hidden_size, 512, self.cfg, self.config),
+                                           nn.Tanh(),
+                                           Dropout_Linear(512, self.cfg.target_size, self.cfg, self.config))
+
+        self.sigmoid = nn.Sigmoid()
+
+    def _init_weights(self, module):
+        if isinstance(module, nn.Linear):
+            module.weight.data.normal_(mean=0.0, std=self.config.initializer_range)
+            if module.bias is not None:
+                module.bias.data.zero_()
+        elif isinstance(module, nn.Embedding):
+            module.weight.data.normal_(mean=0.0, std=self.config.initializer_range)
+            if module.padding_idx is not None:
+                module.weight.data[module.padding_idx].zero_()
+        elif isinstance(module, nn.LayerNorm):
+            module.bias.data.zero_()
+            module.weight.data.fill_(1.0)
+
+    def mixing_hidden_layers(self, inputs):
+        model_list1 = ["albert-base-v2", "xlm-roberta-base"]  # Models with dim(output) == 4
+        model_list2 = ["microsoft/deberta-v3-base", "microsoft/mdeberta-v3-base", "microsoft/deberta-v3-large"]  # Models with dim(output) == 3
+        #print(self.model(**inputs))
+        if self.cfg.pretrained_model in model_list1:
+            all_layers = [layer for layer in self.model(**inputs)[2]]
+        elif self.cfg.pretrained_model in model_list2:
+            all_layers = [layer for layer in self.model(**inputs)[1]]
+        else:
+            raise Exception("New model is being used, please confirm the model output length in 'mixing_hidden_layers'.")
+        all_layers = all_layers + [self.model(**inputs)[0]]
+        all_layers = torch.stack(all_layers, dim=-1)
+        mixed_layer_embeddings = torch.squeeze(self.mixing_layers(all_layers), dim=-1)
+        return mixed_layer_embeddings
+
+    def forward(self, inputs):
+        mixed_layer_embeddings = self.mixing_hidden_layers(inputs)
+        weights = self.attention(mixed_layer_embeddings)
+        final_feature = torch.sum(weights * mixed_layer_embeddings, dim=1)
+        output = self.final_forward(final_feature)
+        if self.cfg.loss_fn == "MSE" or self.cfg.loss_fn == "CCC1" or self.cfg.loss_fn == "CCC2" or self.cfg.loss_fn == "PCC":
+            return self.sigmoid(output)
+        return output
